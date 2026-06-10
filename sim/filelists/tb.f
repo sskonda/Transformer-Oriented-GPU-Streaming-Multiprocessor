@@ -6,8 +6,12 @@
 ../../tb/assertions/tensor_core_sva.sv
 ../../tb/assertions/shared_memory_sva.sv
 ../../tb/assertions/prefetch_sva.sv
+../../tb/assertions/instruction_queue_sva.sv
+../../tb/assertions/scalar_alu_sva.sv
 ../../tb/sv/scoreboard_tb.sv
 ../../tb/sv/scheduler_tb.sv
 ../../tb/sv/tensor_core_tb.sv
 ../../tb/sv/shared_memory_tb.sv
 ../../tb/sv/async_tile_prefetch_tb.sv
+../../tb/sv/instruction_queue_tb.sv
+../../tb/sv/scalar_alu_tb.sv

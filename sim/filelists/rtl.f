@@ -10,3 +10,5 @@
 ../../rtl/scheduler/warp_scheduler.sv
 ../../rtl/tensor/tensor_core.sv
 ../../rtl/prefetch/async_tile_prefetch.sv
+../../rtl/issue/instruction_queue.sv
+../../rtl/execute/scalar_alu.sv

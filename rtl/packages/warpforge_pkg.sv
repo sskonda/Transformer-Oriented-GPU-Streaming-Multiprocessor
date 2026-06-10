@@ -8,6 +8,7 @@ package warpforge_pkg;
   parameter int unsigned SHARED_NUM_BANKS = 4;
   parameter int unsigned SHARED_ADDR_WIDTH = 8;
   parameter int unsigned SHARED_DATA_WIDTH = 32;
+  parameter int unsigned SCALAR_DATA_WIDTH = 32;
   parameter int unsigned PREFETCH_QUEUE_DEPTH = 4;
   parameter int unsigned TENSOR_M = 4;
   parameter int unsigned TENSOR_N = 4;
@@ -30,6 +31,7 @@ package warpforge_pkg;
   typedef logic [INSTR_ADDR_WIDTH-1:0] instr_addr_t;
   typedef logic signed [TENSOR_INPUT_WIDTH-1:0] tensor_input_t;
   typedef logic signed [TENSOR_ACC_WIDTH-1:0] tensor_acc_t;
+  typedef logic signed [SCALAR_DATA_WIDTH-1:0] scalar_data_t;
 
   typedef enum logic [3:0] {
     OP_NOP,
@@ -100,6 +102,18 @@ package warpforge_pkg;
 
   function automatic logic opcode_writes_register(input opcode_e opcode);
     return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD, OP_TENSOR_MMA};
+  endfunction
+
+  function automatic logic opcode_uses_src0(input opcode_e opcode);
+    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD};
+  endfunction
+
+  function automatic logic opcode_uses_src1(input opcode_e opcode);
+    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD};
+  endfunction
+
+  function automatic logic opcode_uses_src2(input opcode_e opcode);
+    return opcode == OP_ALU_MAD;
   endfunction
 
   function automatic logic opcode_is_legal(input opcode_e opcode);

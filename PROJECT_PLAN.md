@@ -46,7 +46,7 @@ Verification is layered:
 - [x] Milestone 5: Tensor core
 - [x] Milestone 6: Shared memory
 - [x] Milestone 7: Async tile prefetch engine
-- [ ] Milestone 8: Instruction issue and scalar execution
+- [x] Milestone 8: Instruction issue and scalar execution
 - [ ] Milestone 9: Architecture performance counters
 - [ ] Milestone 10: Tensor core efficiency upgrade
 - [ ] Milestone 11: Shared memory banking cleanup
