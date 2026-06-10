@@ -108,6 +108,22 @@ module shared_memory_tb;
       $fatal(1, "retried request data was not stored");
     end
 
+    clear = 1'b1;
+    @(negedge clk);
+    clear = 1'b0;
+    if (rsp_valid != '0 || conflict_count != '0) begin
+      $fatal(1, "clear did not reset shared-memory control state");
+    end
+
+    req_valid = 2'b10;
+    req_write = '0;
+    req_addr[1] = BANK0_ROW1;
+    @(negedge clk);
+    drive_idle();
+    if (!rsp_valid[1] || rsp_rdata[1] != DATA_C) begin
+      $fatal(1, "clear unexpectedly modified shared-memory contents");
+    end
+
     $display("shared_memory_tb PASS");
     $finish;
   end

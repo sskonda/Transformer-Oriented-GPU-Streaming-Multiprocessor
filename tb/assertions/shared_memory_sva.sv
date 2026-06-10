@@ -8,6 +8,7 @@ module shared_memory_sva #(
   input logic clear,
   input logic [NUM_PORTS-1:0] req_valid,
   input logic [NUM_PORTS-1:0] req_ready,
+  input logic [NUM_PORTS-1:0] req_write,
   input wire logic [NUM_PORTS-1:0][ADDR_WIDTH-1:0] req_addr,
   input logic [NUM_PORTS-1:0] rsp_valid,
   input logic conflict_event,
@@ -30,6 +31,10 @@ module shared_memory_sva #(
     for (genvar port = 0; port < NUM_PORTS; port++) begin : g_address_known
       assert property (@(posedge clk) disable iff (rst || clear)
         req_valid[port] |-> !$isunknown(req_addr[port]));
+
+      assert property (@(posedge clk) disable iff (rst || clear)
+        req_valid[port] && req_ready[port] && !req_write[port]
+        |=> rsp_valid[port]);
     end
   endgenerate
 

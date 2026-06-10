@@ -49,7 +49,7 @@ Verification is layered:
 - [x] Milestone 8: Instruction issue and scalar execution
 - [x] Milestone 9: Architecture performance counters
 - [x] Milestone 10: Tensor core efficiency upgrade
-- [ ] Milestone 11: Shared memory banking cleanup
+- [x] Milestone 11: Shared memory banking cleanup
 - [ ] Milestone 12: Top-level SM integration
 - [ ] Milestone 13: Integrated UVM environment
 - [ ] Milestone 14: Directed and constrained-random regressions

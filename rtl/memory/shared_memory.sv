@@ -22,14 +22,19 @@ module shared_memory #(
   localparam int unsigned BANK_INDEX_WIDTH =
       (NUM_BANKS > 1) ? $clog2(NUM_BANKS) : 1;
   localparam int unsigned ROW_ADDR_WIDTH = ADDR_WIDTH - BANK_INDEX_WIDTH;
-  localparam int unsigned ROWS_PER_BANK = 1 << ROW_ADDR_WIDTH;
+  localparam int unsigned PORT_INDEX_WIDTH =
+      (NUM_PORTS > 1) ? $clog2(NUM_PORTS) : 1;
   localparam int unsigned LOSER_COUNT_WIDTH =
       (NUM_PORTS > 1) ? $clog2(NUM_PORTS + 1) : 1;
 
-  logic [DATA_WIDTH-1:0] mem [0:NUM_BANKS-1][0:ROWS_PER_BANK-1];
-  logic [NUM_PORTS-1:0] grant;
-  logic [NUM_PORTS-1:0] rsp_valid_r;
-  logic [NUM_PORTS-1:0][DATA_WIDTH-1:0] rsp_rdata_r;
+  logic [NUM_BANKS-1:0] bank_valid;
+  logic [NUM_BANKS-1:0] bank_write;
+  logic [NUM_BANKS-1:0][ROW_ADDR_WIDTH-1:0] bank_row;
+  logic [NUM_BANKS-1:0][DATA_WIDTH-1:0] bank_wdata;
+  logic [NUM_BANKS-1:0][PORT_INDEX_WIDTH-1:0] bank_port;
+  logic [NUM_BANKS-1:0] bank_rd_valid;
+  logic [NUM_BANKS-1:0][DATA_WIDTH-1:0] bank_rd_data;
+  logic [NUM_BANKS-1:0][PORT_INDEX_WIDTH-1:0] bank_rsp_port_r;
   logic [LOSER_COUNT_WIDTH-1:0] conflict_losers;
 
   function automatic logic [BANK_INDEX_WIDTH-1:0] address_bank(
@@ -44,21 +49,40 @@ module shared_memory #(
     return address[ADDR_WIDTH-1:BANK_INDEX_WIDTH];
   endfunction
 
+  function automatic logic [COUNTER_WIDTH-1:0] saturating_add(
+    input logic [COUNTER_WIDTH-1:0] value,
+    input logic [LOSER_COUNT_WIDTH-1:0] increment
+  );
+    logic [COUNTER_WIDTH:0] sum;
+
+    sum = {1'b0, value} + increment;
+    return sum[COUNTER_WIDTH]
+        ? {COUNTER_WIDTH{1'b1}}
+        : sum[COUNTER_WIDTH-1:0];
+  endfunction
+
   always_comb begin
     req_ready = '0;
-    grant = '0;
+    bank_valid = '0;
+    bank_write = '0;
+    bank_row = '0;
+    bank_wdata = '0;
+    bank_port = '0;
     conflict_losers = '0;
 
     for (int unsigned bank = 0; bank < NUM_BANKS; bank++) begin
-      logic bank_granted;
-      bank_granted = 1'b0;
-
       for (int unsigned port = 0; port < NUM_PORTS; port++) begin
-        if (req_valid[port] && address_bank(req_addr[port]) == bank) begin
-          if (!bank_granted) begin
+        if (
+          req_valid[port] &&
+          address_bank(req_addr[port]) == bank
+        ) begin
+          if (!bank_valid[bank]) begin
             req_ready[port] = 1'b1;
-            grant[port] = 1'b1;
-            bank_granted = 1'b1;
+            bank_valid[bank] = 1'b1;
+            bank_write[bank] = req_write[port];
+            bank_row[bank] = address_row(req_addr[port]);
+            bank_wdata[bank] = req_wdata[port];
+            bank_port[bank] = port[PORT_INDEX_WIDTH-1:0];
           end else begin
             conflict_losers = conflict_losers + 1'b1;
           end
@@ -67,35 +91,56 @@ module shared_memory #(
     end
   end
 
-  assign conflict_event = conflict_losers != '0;
-  assign rsp_valid = rsp_valid_r;
-  assign rsp_rdata = rsp_rdata_r;
-
   always_ff @(posedge clk) begin
     if (rst || clear) begin
-      rsp_valid_r <= '0;
+      bank_rsp_port_r <= '0;
       conflict_count <= '0;
     end else begin
-      rsp_valid_r <= '0;
-
-      for (int unsigned port = 0; port < NUM_PORTS; port++) begin
-        if (grant[port]) begin
-          if (req_write[port]) begin
-            mem[address_bank(req_addr[port])][address_row(req_addr[port])]
-                <= req_wdata[port];
-          end else begin
-            rsp_valid_r[port] <= 1'b1;
-            rsp_rdata_r[port]
-                <= mem[address_bank(req_addr[port])][address_row(req_addr[port])];
-          end
+      for (int unsigned bank = 0; bank < NUM_BANKS; bank++) begin
+        if (bank_valid[bank] && !bank_write[bank]) begin
+          bank_rsp_port_r[bank] <= bank_port[bank];
         end
       end
 
       if (conflict_event) begin
-        conflict_count <= conflict_count + conflict_losers;
+        conflict_count <=
+            saturating_add(conflict_count, conflict_losers);
       end
     end
   end
+
+  always_comb begin
+    rsp_valid = '0;
+    rsp_rdata = '0;
+
+    for (int unsigned bank = 0; bank < NUM_BANKS; bank++) begin
+      if (bank_rd_valid[bank]) begin
+        rsp_valid[bank_rsp_port_r[bank]] = 1'b1;
+        rsp_rdata[bank_rsp_port_r[bank]] = bank_rd_data[bank];
+      end
+    end
+  end
+
+  assign conflict_event = conflict_losers != '0;
+
+  generate
+    for (genvar bank = 0; bank < NUM_BANKS; bank++) begin : g_bank
+      ram_sdp #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .ADDR_WIDTH(ROW_ADDR_WIDTH)
+      ) storage (
+        .clk,
+        .rst(rst || clear),
+        .rd_en(bank_valid[bank] && !bank_write[bank]),
+        .rd_addr(bank_row[bank]),
+        .rd_valid(bank_rd_valid[bank]),
+        .rd_data(bank_rd_data[bank]),
+        .wr_en(bank_valid[bank] && bank_write[bank]),
+        .wr_addr(bank_row[bank]),
+        .wr_data(bank_wdata[bank])
+      );
+    end
+  endgenerate
 
   initial begin
     if (NUM_PORTS == 0 || NUM_BANKS == 0) begin
@@ -120,6 +165,7 @@ module shared_memory #(
     .clear,
     .req_valid,
     .req_ready,
+    .req_write,
     .req_addr,
     .rsp_valid,
     .conflict_event,
