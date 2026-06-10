@@ -40,7 +40,7 @@ Verification is layered:
 
 - [x] Milestone 0: Repository setup
 - [x] Milestone 1: Shared package and interfaces
-- [ ] Milestone 2: Common RTL infrastructure
+- [x] Milestone 2: Common RTL infrastructure
 - [ ] Milestone 3: Scoreboard RTL and unit verification
 - [ ] Milestone 4: Warp state table and scheduler
 - [ ] Milestone 5: Tensor core
