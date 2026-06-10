@@ -1,0 +1,44 @@
+# Simulator outputs
+work/
+transcript
+*.wlf
+*.vcd
+*.fst
+*.log
+*.jou
+*.pb
+*.ucdb
+covhtmlreport/
+coverage/
+simv
+simv.daidir/
+csrc/
+ucli.key
+xcelium.d/
+INCA_libs/
+waves.shm/
+obj_dir/
+
+# Build and temporary files
+build/
+out/
+tmp/
+temp/
+*.bak
+*.swp
+*.tmp
+
+# Tools and editors
+.idea/
+.vscode/
+*.code-workspace
+
+# Operating systems
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
