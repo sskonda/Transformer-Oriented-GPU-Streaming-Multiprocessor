@@ -39,7 +39,7 @@ Verification is layered:
 ## Milestones
 
 - [x] Milestone 0: Repository setup
-- [ ] Milestone 1: Shared package and interfaces
+- [x] Milestone 1: Shared package and interfaces
 - [ ] Milestone 2: Common RTL infrastructure
 - [ ] Milestone 3: Scoreboard RTL and unit verification
 - [ ] Milestone 4: Warp state table and scheduler
