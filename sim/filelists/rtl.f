@@ -8,6 +8,8 @@
 ../../rtl/scoreboard/scoreboard.sv
 ../../rtl/scheduler/warp_state_table.sv
 ../../rtl/scheduler/warp_scheduler.sv
+../../rtl/tensor/tensor_core_tree.sv
+../../rtl/tensor/tensor_core_pipelined_tree.sv
 ../../rtl/tensor/tensor_core.sv
 ../../rtl/prefetch/async_tile_prefetch.sv
 ../../rtl/issue/instruction_queue.sv

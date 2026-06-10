@@ -4,8 +4,8 @@ module tensor_core #(
   parameter int unsigned K = warpforge_pkg::TENSOR_K,
   parameter int unsigned INPUT_WIDTH = warpforge_pkg::TENSOR_INPUT_WIDTH,
   parameter int unsigned ACC_WIDTH = warpforge_pkg::TENSOR_ACC_WIDTH,
-  parameter int unsigned PIPELINE_LATENCY =
-      warpforge_pkg::TENSOR_PIPELINE_LATENCY
+  parameter warpforge_pkg::tensor_arch_e TENSOR_ARCH =
+      warpforge_pkg::TENSOR_ARCH_PIPELINED_TREE
 ) (
   input  logic clk,
   input  logic rst,
@@ -15,78 +15,59 @@ module tensor_core #(
   input  wire logic signed [M-1:0][K-1:0][INPUT_WIDTH-1:0] matrix_a,
   input  wire logic signed [K-1:0][N-1:0][INPUT_WIDTH-1:0] matrix_b,
   output logic out_valid,
+  input  logic out_ready,
   output logic signed [M-1:0][N-1:0][ACC_WIDTH-1:0] matrix_c,
   output logic busy
 );
+  import warpforge_pkg::*;
 
-  localparam int unsigned TREE_LEAVES =
-      (K > 1) ? (1 << $clog2(K)) : 1;
-  localparam int unsigned TREE_NODES = (2 * TREE_LEAVES) - 1;
-
-  logic signed [ACC_WIDTH-1:0] reduction_tree
-      [0:M-1][0:N-1][0:TREE_NODES-1];
-  logic signed [M-1:0][N-1:0][ACC_WIDTH-1:0] result_comb;
-
-  always_comb begin
-    for (int unsigned row = 0; row < M; row++) begin
-      for (int unsigned col = 0; col < N; col++) begin
-        for (int unsigned leaf = 0; leaf < TREE_LEAVES; leaf++) begin
-          if (leaf < K) begin
-            reduction_tree[row][col][TREE_LEAVES-1+leaf] =
-                $signed(matrix_a[row][leaf]) * $signed(matrix_b[leaf][col]);
-          end else begin
-            reduction_tree[row][col][TREE_LEAVES-1+leaf] = '0;
-          end
-        end
-
-        for (int node = TREE_LEAVES - 2; node >= 0; node--) begin
-          reduction_tree[row][col][node] =
-              reduction_tree[row][col][(2*node)+1] +
-              reduction_tree[row][col][(2*node)+2];
-        end
-
-        result_comb[row][col] = reduction_tree[row][col][0];
-      end
-    end
-  end
-
-  assign in_ready = 1'b1;
+  localparam int unsigned PIPELINE_STAGES = 1 + $clog2(K);
 
   generate
-    if (PIPELINE_LATENCY == 0) begin : g_bypass
-      assign out_valid = in_valid;
-      assign matrix_c = result_comb;
-      assign busy = in_valid;
-    end else begin : g_pipeline
-      logic [PIPELINE_LATENCY-1:0] valid_r;
-      logic signed
-          [PIPELINE_LATENCY-1:0][M-1:0][N-1:0][ACC_WIDTH-1:0] result_r;
+    if (TENSOR_ARCH == TENSOR_ARCH_TREE) begin : g_tree
+      logic signed [M-1:0][N-1:0][ACC_WIDTH-1:0] result;
 
-      always_ff @(posedge clk) begin
-        if (rst || clear) begin
-          valid_r <= '0;
-        end else begin
-          valid_r[0] <= in_valid;
-          if (in_valid) begin
-            result_r[0] <= result_comb;
-          end
+      tensor_core_tree #(
+        .M(M),
+        .N(N),
+        .K(K),
+        .INPUT_WIDTH(INPUT_WIDTH),
+        .ACC_WIDTH(ACC_WIDTH)
+      ) datapath (
+        .matrix_a,
+        .matrix_b,
+        .matrix_c(result)
+      );
 
-          for (
-            int unsigned stage = 1;
-            stage < PIPELINE_LATENCY;
-            stage++
-          ) begin
-            valid_r[stage] <= valid_r[stage-1];
-            if (valid_r[stage-1]) begin
-              result_r[stage] <= result_r[stage-1];
-            end
-          end
-        end
-      end
-
-      assign out_valid = valid_r[PIPELINE_LATENCY-1];
-      assign matrix_c = result_r[PIPELINE_LATENCY-1];
-      assign busy = valid_r != '0;
+      assign in_ready = out_ready && !rst && !clear;
+      assign out_valid = in_valid && !rst && !clear;
+      assign matrix_c = result;
+      assign busy = out_valid;
+    end else if (TENSOR_ARCH == TENSOR_ARCH_PIPELINED_TREE) begin : g_pipeline
+      tensor_core_pipelined_tree #(
+        .M(M),
+        .N(N),
+        .K(K),
+        .INPUT_WIDTH(INPUT_WIDTH),
+        .ACC_WIDTH(ACC_WIDTH)
+      ) datapath (
+        .clk,
+        .rst,
+        .clear,
+        .in_valid,
+        .in_ready,
+        .matrix_a,
+        .matrix_b,
+        .out_valid,
+        .out_ready,
+        .matrix_c,
+        .busy
+      );
+    end else begin : g_unsupported
+      assign in_ready = 1'b0;
+      assign out_valid = 1'b0;
+      assign matrix_c = '0;
+      assign busy = 1'b0;
     end
   endgenerate
 
@@ -97,18 +78,27 @@ module tensor_core #(
     if (INPUT_WIDTH == 0 || ACC_WIDTH < (2 * INPUT_WIDTH)) begin
       $fatal(1, "tensor_core arithmetic widths are invalid");
     end
+    if (TENSOR_ARCH == TENSOR_ARCH_SYSTOLIC) begin
+      $fatal(1, "tensor_core systolic architecture is not implemented");
+    end
   end
 
 `ifndef SYNTHESIS
   tensor_core_sva #(
-    .PIPELINE_LATENCY(PIPELINE_LATENCY)
+    .M(M),
+    .N(N),
+    .ACC_WIDTH(ACC_WIDTH),
+    .PIPELINE_STAGES(PIPELINE_STAGES),
+    .TENSOR_ARCH(TENSOR_ARCH)
   ) assertions (
     .clk,
     .rst,
     .clear,
     .in_valid,
     .in_ready,
-    .out_valid
+    .out_valid,
+    .out_ready,
+    .matrix_c
   );
 `endif
 

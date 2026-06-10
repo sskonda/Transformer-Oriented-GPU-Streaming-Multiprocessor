@@ -15,7 +15,7 @@ package warpforge_pkg;
   parameter int unsigned TENSOR_K = 4;
   parameter int unsigned TENSOR_INPUT_WIDTH = 8;
   parameter int unsigned TENSOR_ACC_WIDTH = 32;
-  parameter int unsigned TENSOR_PIPELINE_LATENCY = 3;
+  parameter int unsigned TENSOR_PIPELINE_LATENCY = 1 + $clog2(TENSOR_K);
   parameter int unsigned PERF_COUNTER_WIDTH = 64;
 
   localparam int unsigned WARP_ID_WIDTH = (NUM_WARPS > 1) ? $clog2(NUM_WARPS) : 1;
@@ -62,6 +62,12 @@ package warpforge_pkg;
     SCHED_GREEDY,
     SCHED_MEMORY_AWARE
   } scheduler_policy_e;
+
+  typedef enum logic [1:0] {
+    TENSOR_ARCH_TREE,
+    TENSOR_ARCH_PIPELINED_TREE,
+    TENSOR_ARCH_SYSTOLIC
+  } tensor_arch_e;
 
   typedef struct packed {
     opcode_e opcode;
