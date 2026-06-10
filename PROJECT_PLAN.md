@@ -45,16 +45,20 @@ Verification is layered:
 - [x] Milestone 4: Warp state table and scheduler
 - [x] Milestone 5: Tensor core
 - [x] Milestone 6: Shared memory
-- [ ] Milestone 7: Async tile prefetch engine
+- [x] Milestone 7: Async tile prefetch engine
 - [ ] Milestone 8: Instruction issue and scalar execution
-- [ ] Milestone 9: Performance counters
-- [ ] Milestone 10: Top-level integration
-- [ ] Milestone 11: UVM environment completion
-- [ ] Milestone 12: Directed tests
-- [ ] Milestone 13: Constrained-random and regression tests
-- [ ] Milestone 14: Race-condition and edge-case hardening
-- [ ] Milestone 15: Documentation
-- [ ] Milestone 16: Final cleanup
+- [ ] Milestone 9: Architecture performance counters
+- [ ] Milestone 10: Tensor core efficiency upgrade
+- [ ] Milestone 11: Shared memory banking cleanup
+- [ ] Milestone 12: Top-level SM integration
+- [ ] Milestone 13: Integrated UVM environment
+- [ ] Milestone 14: Directed and constrained-random regressions
+- [ ] Milestone 15: Assembly and workload tooling
+- [ ] Milestone 16: GEMM and tiny inference workloads
+- [ ] Milestone 17: Performance analysis
+- [ ] Milestone 18: CI and lint support
+- [ ] Milestone 19: Architecture and verification documentation
+- [ ] Milestone 20: Final integration cleanup
 
 ## Commit Plan
 
