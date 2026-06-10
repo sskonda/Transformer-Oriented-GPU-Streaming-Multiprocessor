@@ -5,3 +5,5 @@
 ../../rtl/common/valid_pipeline.sv
 ../../rtl/memory/ram_sdp.sv
 ../../rtl/scoreboard/scoreboard.sv
+../../rtl/scheduler/warp_state_table.sv
+../../rtl/scheduler/warp_scheduler.sv

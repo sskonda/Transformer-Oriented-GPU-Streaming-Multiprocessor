@@ -42,7 +42,7 @@ Verification is layered:
 - [x] Milestone 1: Shared package and interfaces
 - [x] Milestone 2: Common RTL infrastructure
 - [x] Milestone 3: Scoreboard RTL and unit verification
-- [ ] Milestone 4: Warp state table and scheduler
+- [x] Milestone 4: Warp state table and scheduler
 - [ ] Milestone 5: Tensor core
 - [ ] Milestone 6: Shared memory
 - [ ] Milestone 7: Async tile prefetch engine
