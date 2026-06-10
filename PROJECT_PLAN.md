@@ -44,7 +44,7 @@ Verification is layered:
 - [x] Milestone 3: Scoreboard RTL and unit verification
 - [x] Milestone 4: Warp state table and scheduler
 - [x] Milestone 5: Tensor core
-- [ ] Milestone 6: Shared memory
+- [x] Milestone 6: Shared memory
 - [ ] Milestone 7: Async tile prefetch engine
 - [ ] Milestone 8: Instruction issue and scalar execution
 - [ ] Milestone 9: Performance counters
