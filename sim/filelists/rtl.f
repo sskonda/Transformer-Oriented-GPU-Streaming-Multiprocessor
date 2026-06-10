@@ -4,3 +4,4 @@
 ../../rtl/common/skid_buffer.sv
 ../../rtl/common/valid_pipeline.sv
 ../../rtl/memory/ram_sdp.sv
+../../rtl/scoreboard/scoreboard.sv
