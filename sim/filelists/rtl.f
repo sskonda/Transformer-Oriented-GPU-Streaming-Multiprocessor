@@ -12,3 +12,4 @@
 ../../rtl/prefetch/async_tile_prefetch.sv
 ../../rtl/issue/instruction_queue.sv
 ../../rtl/execute/scalar_alu.sv
+../../rtl/counters/perf_counters.sv

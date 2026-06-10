@@ -82,6 +82,8 @@ package warpforge_pkg;
     logic [PERF_COUNTER_WIDTH-1:0] scheduler_stall_cycles;
     logic [PERF_COUNTER_WIDTH-1:0] scoreboard_stall_cycles;
     logic [PERF_COUNTER_WIDTH-1:0] tile_wait_cycles;
+    logic [PERF_COUNTER_WIDTH-1:0] tensor_wait_cycles;
+    logic [PERF_COUNTER_WIDTH-1:0] prefetch_stall_cycles;
     logic [PERF_COUNTER_WIDTH-1:0] tensor_busy_cycles;
     logic [PERF_COUNTER_WIDTH-1:0] tensor_accepted;
     logic [PERF_COUNTER_WIDTH-1:0] tensor_completed;
