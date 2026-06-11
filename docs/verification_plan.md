@@ -39,6 +39,11 @@ The `sanity_smoke_test` runs the same two-warp architectural scenario as the
 direct top-level test. One warp prefetches and executes a signed INT8 tensor
 operation. A second warp executes a dependent scalar instruction chain.
 
+The checked ModelSim regression runs 22 representative targets: seven direct
+unit benches, the file-driven GEMM workload, and fourteen integrated UVM
+tests. Named aliases in `sim/test_manifest.csv` map more detailed test-plan
+names onto the self-checking unit benches that contain those cases.
+
 ## Simulator capability
 
 ModelSim Intel FPGA Starter Edition can run the deterministic UVM environment
