@@ -18,7 +18,7 @@ latency tolerance, and resource arbitration. WarpForge makes those
 interactions visible in a compact project that can be simulated, verified,
 and discussed at the RTL and microarchitecture levels.
 
-## Why This Is Not RISC-V
+## Difference between this and a generic CPU
 
 WarpForge is not a general-purpose CPU and does not implement the RISC-V ISA.
 It uses a compact custom instruction format built around warp scheduling,
