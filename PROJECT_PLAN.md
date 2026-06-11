@@ -53,7 +53,7 @@ Verification is layered:
 - [x] Milestone 12: Top-level SM integration
 - [x] Milestone 13: Integrated UVM environment
 - [x] Milestone 14: Directed and constrained-random regressions
-- [ ] Milestone 15: Assembly and workload tooling
+- [x] Milestone 15: Assembly and workload tooling
 - [ ] Milestone 16: GEMM and tiny inference workloads
 - [ ] Milestone 17: Performance analysis
 - [ ] Milestone 18: CI and lint support
