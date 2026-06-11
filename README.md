@@ -361,31 +361,6 @@ support, deeper coverage, formal checks, and measured FPGA synthesis.
 
 See [future_work.md](docs/future_work.md).
 
-## Resume Bullets
-
-- Designed a transformer-oriented GPU Streaming Multiprocessor in
-  SystemVerilog with SIMT-style warp scheduling, scoreboard dependency
-  tracking, banked shared memory, asynchronous tile prefetch, and an INT8
-  tensor datapath.
-- Built a UVM verification environment with a reference model, self-checking
-  scoreboard, seeded instruction tests, functional coverage source,
-  SystemVerilog Assertions, and reset/backpressure stress tests.
-- Implemented architecture counters and simulation-derived CSV analysis for
-  issue activity, tensor utilization, dependency stalls, memory waits, bank
-  conflicts, prefetch behavior, and warp completion.
-
-## Portfolio Talking Points
-
-- Why valid/ready protocols and clocking blocks eliminate ordering-dependent
-  testbench behavior
-- How scoreboard state, writeback priority, and optional forwarding affect
-  issue throughput
-- Why a pipelined balanced reduction has a different timing/area tradeoff
-  from a combinational tree or systolic array
-- How bank mapping and deterministic arbitration influence shared-memory
-  throughput
-- Why memory-aware scheduling needs overlapping independent work to outperform
-  simpler policies
 
 ## Repository Layout
 
