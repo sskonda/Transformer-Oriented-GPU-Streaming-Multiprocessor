@@ -27,6 +27,7 @@ jobs:
             --Wall \
             -Wno-fatal \
             --top-module warpforge_top \
+            +define+SYNTHESIS \
             -f rtl.f
 
   verible:
