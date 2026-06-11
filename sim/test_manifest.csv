@@ -30,3 +30,4 @@ random_multi_warp_test,uvm,tb_top,seeded four-warp scalar programs
 random_memory_latency_test,uvm,tb_top,variable response latency
 random_backpressure_test,uvm,tb_top,request ready backpressure
 long_regression_test,uvm,tb_top,long seeded four-warp program
+workload_gemm_test,direct,workload_gemm_tb,file-driven integrated 4x4 INT8 GEMM

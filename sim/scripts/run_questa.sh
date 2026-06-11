@@ -44,6 +44,10 @@ case "$TEST" in
     TOP=perf_counters_tb
     MODE=unit
     ;;
+  workload_gemm_test)
+    TOP=workload_gemm_tb
+    MODE=unit
+    ;;
   *)
     TOP=tb_top
     MODE=uvm

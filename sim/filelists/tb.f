@@ -19,3 +19,4 @@
 ../../tb/sv/scalar_alu_tb.sv
 ../../tb/sv/perf_counters_tb.sv
 ../../tb/sv/warpforge_top_tb.sv
+../../tb/sv/workload_gemm_tb.sv

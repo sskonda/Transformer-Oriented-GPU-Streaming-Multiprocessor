@@ -34,6 +34,7 @@ $unitTests = @{
   instruction_queue_load_issue_test = "instruction_queue_tb"
   scalar_alu_basic_test = "scalar_alu_tb"
   perf_counter_basic_test = "perf_counters_tb"
+  workload_gemm_test = "workload_gemm_tb"
 }
 
 $uvmTests = @(
@@ -149,7 +150,8 @@ if ($Test -eq "all") {
     "prefetch_basic_test",
     "instruction_queue_load_issue_test",
     "scalar_alu_basic_test",
-    "perf_counter_basic_test"
+    "perf_counter_basic_test",
+    "workload_gemm_test"
   )
   foreach ($testName in $unitRepresentatives + $uvmTests) {
     Invoke-WarpForgeTest $testName

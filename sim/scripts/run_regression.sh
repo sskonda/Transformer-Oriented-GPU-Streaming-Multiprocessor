@@ -13,6 +13,7 @@ TESTS=(
   instruction_queue_load_issue_test
   scalar_alu_basic_test
   perf_counter_basic_test
+  workload_gemm_test
   sanity_smoke_test
   scheduler_round_robin_test
   scheduler_greedy_test

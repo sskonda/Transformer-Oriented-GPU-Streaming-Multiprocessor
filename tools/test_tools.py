@@ -62,6 +62,10 @@ class GeneratorTest(unittest.TestCase):
             len((output / "program.hex").read_text().splitlines()),
             4,
         )
+        self.assertEqual(
+            len((output / "result.hex").read_text().splitlines()),
+            MATRIX_SIZE * MATRIX_SIZE,
+        )
         golden = json.loads(
             (output / "golden.json").read_text(encoding="ascii")
         )

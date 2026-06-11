@@ -10,6 +10,7 @@ from assembler import assemble_text, render_hex
 MATRIX_SIZE = 4
 ELEMENTS_PER_WORD = 4
 ELEMENT_WIDTH = 8
+RESULT_WIDTH = 32
 DEFAULT_SEED = 7
 DEFAULT_MIN_VALUE = -8
 DEFAULT_MAX_VALUE = 7
@@ -93,6 +94,13 @@ def write_outputs(output_dir: Path, seed: int) -> None:
     )
     (output_dir / "memory.hex").write_text(
         "".join(f"{word:08x}\n" for word in data["memory_words"]),
+        encoding="ascii",
+    )
+    (output_dir / "result.hex").write_text(
+        "".join(
+            f"{value & ((1 << RESULT_WIDTH) - 1):08x}\n"
+            for value in flatten(data["expected_c"])
+        ),
         encoding="ascii",
     )
     (output_dir / "golden.json").write_text(
