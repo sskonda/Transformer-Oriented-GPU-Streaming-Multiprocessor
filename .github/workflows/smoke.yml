@@ -1,0 +1,32 @@
+name: Smoke Verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  software-and-rtl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Python unit tests
+        run: python -B -m unittest discover -s tools -p "test_*.py"
+      - name: Run reference workloads
+        run: |
+          python -B workloads/gemm/run_reference.py
+          python -B workloads/mnist_mlp/run_demo.py
+          python -B workloads/tiny_transformer/run_demo.py
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator
+      - name: Build and run RTL GEMM smoke
+        run: ./sim/scripts/run_verilator_smoke.sh

@@ -1,0 +1,48 @@
+name: RTL Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verilator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator
+      - name: Lint synthesizable RTL
+        working-directory: sim/filelists
+        run: |
+          verilator \
+            --lint-only \
+            --timing \
+            --Wall \
+            -Wno-fatal \
+            --top-module warpforge_top \
+            -f rtl.f
+
+  verible:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attempt Verible lint
+        shell: bash
+        run: |
+          sudo apt-get update
+          if apt-cache show verible >/dev/null 2>&1; then
+            sudo apt-get install -y verible
+            mapfile -t rtl_files < <(find rtl -name '*.sv' -print)
+            verible-verilog-lint \
+              --rules=-line-length,-module-filename \
+              "${rtl_files[@]}"
+          else
+            echo "Verible is not available in the runner package index."
+          fi

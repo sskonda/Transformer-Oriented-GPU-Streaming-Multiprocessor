@@ -56,7 +56,7 @@ Verification is layered:
 - [x] Milestone 15: Assembly and workload tooling
 - [x] Milestone 16: GEMM and tiny inference workloads
 - [x] Milestone 17: Performance analysis
-- [ ] Milestone 18: CI and lint support
+- [x] Milestone 18: CI and lint support
 - [ ] Milestone 19: Architecture and verification documentation
 - [ ] Milestone 20: Final integration cleanup
 
