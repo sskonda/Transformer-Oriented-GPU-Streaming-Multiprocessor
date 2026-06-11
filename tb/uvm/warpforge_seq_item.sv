@@ -3,7 +3,8 @@ typedef enum logic [2:0] {
   CMD_LOAD_REGISTER,
   CMD_LOAD_MEMORY,
   CMD_START,
-  CMD_CLEAR
+  CMD_CLEAR,
+  CMD_WAIT_CYCLES
 } warpforge_cmd_e;
 
 typedef enum logic [3:0] {
@@ -30,6 +31,7 @@ class warpforge_seq_item extends uvm_sequence_item;
   logic [GLOBAL_ADDR_WIDTH-1:0] memory_addr;
   logic [SHARED_DATA_WIDTH-1:0] memory_data;
   scheduler_policy_e scheduler_policy;
+  int unsigned wait_cycles;
   instruction_t instruction;
 
   `uvm_object_utils(warpforge_seq_item)

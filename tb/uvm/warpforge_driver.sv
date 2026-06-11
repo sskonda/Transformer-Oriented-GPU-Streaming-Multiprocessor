@@ -4,7 +4,10 @@ class warpforge_driver extends uvm_driver #(warpforge_seq_item);
   virtual warpforge_if vif;
   logic [SHARED_DATA_WIDTH-1:0] memory
       [longint unsigned];
-  int unsigned memory_latency_cycles = 1;
+  int unsigned memory_latency_min = 1;
+  int unsigned memory_latency_max = 1;
+  int unsigned memory_stall_enable;
+  logic [31:0] random_state = 32'h1;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -19,6 +22,27 @@ class warpforge_driver extends uvm_driver #(warpforge_seq_item);
       vif
     )) begin
       `uvm_fatal("NO_VIF", "warpforge_driver requires warpforge_if")
+    end
+    void'(uvm_config_db#(int unsigned)::get(
+      this,
+      "",
+      "memory_latency_min",
+      memory_latency_min
+    ));
+    void'(uvm_config_db#(int unsigned)::get(
+      this,
+      "",
+      "memory_latency_max",
+      memory_latency_max
+    ));
+    void'(uvm_config_db#(int unsigned)::get(
+      this,
+      "",
+      "memory_stall_enable",
+      memory_stall_enable
+    ));
+    if (memory_latency_max < memory_latency_min) begin
+      `uvm_fatal("MEMORY_CONFIG", "Maximum latency is below minimum")
     end
   endfunction
 
@@ -91,6 +115,7 @@ class warpforge_driver extends uvm_driver #(warpforge_seq_item);
             memory[longint'(req.memory_addr)] = req.memory_data;
         CMD_START: drive_start(req);
         CMD_CLEAR: drive_clear();
+        CMD_WAIT_CYCLES: repeat (req.wait_cycles) @(vif.driver_cb);
         default: `uvm_error("BAD_COMMAND", req.convert2string())
       endcase
       seq_item_port.item_done();
@@ -101,27 +126,63 @@ class warpforge_driver extends uvm_driver #(warpforge_seq_item);
     logic request_pending;
     logic response_active;
     logic [GLOBAL_ADDR_WIDTH-1:0] request_addr;
+    logic request_ready_applied;
+    logic request_ready_next;
+    logic random_ready;
     int unsigned delay_remaining;
 
     request_pending = 1'b0;
     response_active = 1'b0;
     delay_remaining = '0;
+    request_ready_applied = 1'b1;
 
     forever begin
       @(vif.driver_cb);
 
-      if (response_active && vif.driver_cb.global_rsp_ready) begin
+      if (vif.rst || vif.clear) begin
+        request_pending = 1'b0;
+        response_active = 1'b0;
+        delay_remaining = '0;
+        vif.driver_cb.global_rsp_valid <= 1'b0;
+      end
+
+      if (
+        !vif.rst &&
+        !vif.clear &&
+        response_active &&
+        vif.driver_cb.global_rsp_ready
+      ) begin
         vif.driver_cb.global_rsp_valid <= 1'b0;
         response_active = 1'b0;
       end
 
-      if (vif.driver_cb.global_req_valid && !request_pending) begin
+      if (
+        !vif.rst &&
+        !vif.clear &&
+        vif.driver_cb.global_req_valid &&
+        request_ready_applied &&
+        !request_pending &&
+        !response_active
+      ) begin
         request_addr = vif.driver_cb.global_req_addr;
         request_pending = 1'b1;
-        delay_remaining = memory_latency_cycles;
+        if (memory_latency_max == memory_latency_min) begin
+          delay_remaining = memory_latency_min;
+        end else begin
+          delay_remaining =
+              memory_latency_min +
+              (random_state % (
+                memory_latency_max - memory_latency_min + 1
+              ));
+        end
       end
 
-      if (request_pending && !response_active) begin
+      if (
+        !vif.rst &&
+        !vif.clear &&
+        request_pending &&
+        !response_active
+      ) begin
         if (delay_remaining != 0) begin
           delay_remaining--;
         end else begin
@@ -140,6 +201,24 @@ class warpforge_driver extends uvm_driver #(warpforge_seq_item);
           response_active = 1'b1;
         end
       end
+
+      random_state = {
+        random_state[30:0],
+        random_state[31] ^
+        random_state[21] ^
+        random_state[1] ^
+        random_state[0]
+      };
+      random_ready =
+          (memory_stall_enable == 0) ||
+          random_state[0] ||
+          random_state[3];
+      request_ready_next =
+          random_ready &&
+          !request_pending &&
+          !response_active;
+      vif.driver_cb.global_req_ready <= request_ready_next;
+      request_ready_applied = request_ready_next;
     end
   endtask
 

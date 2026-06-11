@@ -1,0 +1,32 @@
+test_name,kind,simulation_target,scope
+sanity_smoke_test,uvm,tb_top,integrated scalar tensor prefetch execution
+scheduler_round_robin_test,uvm,tb_top,round-robin integrated scheduling
+scheduler_greedy_test,uvm,tb_top,greedy integrated scheduling
+scheduler_memory_aware_test,uvm,tb_top,memory-aware integrated scheduling
+scoreboard_dependency_test,direct,scoreboard_tb,dependency blocking
+scoreboard_simultaneous_set_clear_test,direct,scoreboard_tb,same-cycle set and clear
+tensor_core_basic_test,direct,tensor_core_tb,basic matrix multiplication
+tensor_core_signed_test,direct,tensor_core_tb,signed arithmetic
+tensor_core_zero_test,direct,tensor_core_tb,zero operands
+tensor_core_extreme_test,direct,tensor_core_tb,INT8 limits
+tensor_core_back_to_back_test,direct,tensor_core_tb,back-to-back requests
+tensor_core_reset_mid_operation_test,direct,tensor_core_tb,reset during operation
+shared_memory_basic_test,direct,shared_memory_tb,multi-bank access
+shared_memory_bank_conflict_test,direct,shared_memory_tb,deterministic conflict arbitration
+shared_memory_read_after_write_test,direct,shared_memory_tb,read-after-write behavior
+prefetch_basic_test,direct,async_tile_prefetch_tb,tile transfer
+prefetch_queue_full_test,direct,async_tile_prefetch_tb,queue backpressure
+prefetch_reset_mid_request_test,direct,async_tile_prefetch_tb,reset during transfer
+instruction_queue_load_issue_test,direct,instruction_queue_tb,load issue PC and END behavior
+scalar_alu_basic_test,direct,scalar_alu_tb,ADD MUL MAD and backpressure
+perf_counter_basic_test,direct,perf_counters_tb,event accounting and clear
+top_single_warp_gemm_test,uvm,tb_top,single-warp tiled matrix operation
+top_multi_warp_contention_test,uvm,tb_top,scalar and tensor warp contention
+barrier_synchronization_test,uvm,tb_top,multi-warp barrier release
+reset_mid_operation_test,uvm,tb_top,integrated clear and restart
+illegal_instruction_test,uvm,tb_top,illegal opcode error completion
+constrained_random_instruction_test,uvm,tb_top,seeded legal scalar programs
+random_multi_warp_test,uvm,tb_top,seeded four-warp scalar programs
+random_memory_latency_test,uvm,tb_top,variable response latency
+random_backpressure_test,uvm,tb_top,request ready backpressure
+long_regression_test,uvm,tb_top,long seeded four-warp program
