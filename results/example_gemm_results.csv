@@ -1,0 +1,2 @@
+workload,policy,seed,cycles,issued,scalar,tensor,prefetch,scheduler_stall,scoreboard_stall,tile_wait,tensor_wait,prefetch_stall,tensor_busy,tensor_accepted,tensor_completed,bank_conflicts,prefetch_requests,prefetch_stalls,completed_warps,illegal,tensor_utilization_percent
+gemm,SCHED_ROUND_ROBIN,17,32,4,0,1,1,25,0,25,0,0,3,1,1,0,1,0,1,0,9.375

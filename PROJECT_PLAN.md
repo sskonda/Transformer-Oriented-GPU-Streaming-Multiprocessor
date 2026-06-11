@@ -55,7 +55,7 @@ Verification is layered:
 - [x] Milestone 14: Directed and constrained-random regressions
 - [x] Milestone 15: Assembly and workload tooling
 - [x] Milestone 16: GEMM and tiny inference workloads
-- [ ] Milestone 17: Performance analysis
+- [x] Milestone 17: Performance analysis
 - [ ] Milestone 18: CI and lint support
 - [ ] Milestone 19: Architecture and verification documentation
 - [ ] Milestone 20: Final integration cleanup

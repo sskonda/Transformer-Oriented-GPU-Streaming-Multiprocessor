@@ -1,0 +1,4 @@
+workload,policy,seed,cycles,issued,scalar,tensor,prefetch,scheduler_stall,scoreboard_stall,tile_wait,tensor_wait,prefetch_stall,tensor_busy,tensor_accepted,tensor_completed,bank_conflicts,prefetch_requests,prefetch_stalls,completed_warps,illegal,tensor_utilization_percent
+uvm_scheduler_smoke,SCHED_ROUND_ROBIN,17,40,7,2,1,1,30,1,33,0,0,3,1,1,0,1,0,2,0,7.500
+uvm_scheduler_smoke,SCHED_GREEDY,17,40,7,2,1,1,30,1,33,0,0,3,1,1,0,1,0,2,0,7.500
+uvm_scheduler_smoke,SCHED_MEMORY_AWARE,17,40,7,2,1,1,30,1,33,0,0,3,1,1,0,1,0,2,0,7.500

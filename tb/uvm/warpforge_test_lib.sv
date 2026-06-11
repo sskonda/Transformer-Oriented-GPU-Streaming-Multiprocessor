@@ -5,6 +5,7 @@ class warpforge_base_test extends uvm_test;
 
   warpforge_env env;
   virtual warpforge_if vif;
+  string performance_workload;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -46,6 +47,9 @@ class warpforge_base_test extends uvm_test;
     uvm_sequence #(warpforge_seq_item) test_sequence,
     output logic completed
   );
+    int unsigned seed;
+    string workload_name;
+
     test_sequence.start(env.agent.sequencer);
     completed = 1'b0;
     for (
@@ -61,6 +65,49 @@ class warpforge_base_test extends uvm_test;
     end
     if (!completed) begin
       `uvm_error("TIMEOUT", "WarpForge test program did not complete")
+    end else begin
+      seed = 1;
+      void'($value$plusargs("SEED=%d", seed));
+      workload_name = performance_workload;
+      if (workload_name.len() == 0) begin
+        workload_name = get_type_name();
+      end
+      `uvm_info(
+        "PERF",
+        $sformatf(
+          {
+            "WARPFORGE_PERF workload=uvm_%s policy=%s seed=%0d ",
+            "cycles=%0d issued=%0d scalar=%0d tensor=%0d prefetch=%0d ",
+            "scheduler_stall=%0d scoreboard_stall=%0d tile_wait=%0d ",
+            "tensor_wait=%0d prefetch_stall=%0d tensor_busy=%0d ",
+            "tensor_accepted=%0d tensor_completed=%0d bank_conflicts=%0d ",
+            "prefetch_requests=%0d prefetch_stalls=%0d ",
+            "completed_warps=%0d illegal=%0d"
+          },
+          workload_name,
+          vif.monitor_cb.scheduler_policy.name(),
+          seed,
+          vif.monitor_cb.counters.total_cycles,
+          vif.monitor_cb.counters.issued_instructions,
+          vif.monitor_cb.counters.scalar_instructions,
+          vif.monitor_cb.counters.tensor_instructions,
+          vif.monitor_cb.counters.prefetch_instructions,
+          vif.monitor_cb.counters.scheduler_stall_cycles,
+          vif.monitor_cb.counters.scoreboard_stall_cycles,
+          vif.monitor_cb.counters.tile_wait_cycles,
+          vif.monitor_cb.counters.tensor_wait_cycles,
+          vif.monitor_cb.counters.prefetch_stall_cycles,
+          vif.monitor_cb.counters.tensor_busy_cycles,
+          vif.monitor_cb.counters.tensor_accepted,
+          vif.monitor_cb.counters.tensor_completed,
+          vif.monitor_cb.counters.bank_conflicts,
+          vif.monitor_cb.counters.prefetch_requests,
+          vif.monitor_cb.counters.prefetch_stalls,
+          vif.monitor_cb.counters.completed_warps,
+          vif.monitor_cb.counters.illegal_instructions
+        ),
+        UVM_NONE
+      )
     end
     repeat (2) @(vif.monitor_cb);
   endtask
@@ -73,6 +120,7 @@ class warpforge_policy_test extends warpforge_base_test;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
+    performance_workload = "scheduler_smoke";
   endfunction
 
   task run_phase(uvm_phase phase);
