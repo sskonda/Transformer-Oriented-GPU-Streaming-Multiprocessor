@@ -10,8 +10,13 @@
 ../../rtl/scheduler/warp_scheduler.sv
 ../../rtl/tensor/tensor_core_tree.sv
 ../../rtl/tensor/tensor_core_pipelined_tree.sv
+../../rtl/tensor/tensor_tile_buffer.sv
 ../../rtl/tensor/tensor_core.sv
 ../../rtl/prefetch/async_tile_prefetch.sv
 ../../rtl/issue/instruction_queue.sv
+../../rtl/execute/scalar_register_file.sv
 ../../rtl/execute/scalar_alu.sv
 ../../rtl/counters/perf_counters.sv
+../../rtl/top/warpforge_issue_control.sv
+../../rtl/top/warpforge_run_control.sv
+../../rtl/top/warpforge_top.sv

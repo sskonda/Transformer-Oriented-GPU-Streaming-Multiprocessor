@@ -16,7 +16,7 @@ module scoreboard_sva #(
   input logic [WARP_ID_WIDTH-1:0] clear_warp_id,
   input logic [REG_INDEX_WIDTH-1:0] clear_reg_idx,
   input logic [NUM_WARPS-1:0] stall,
-  input logic [NUM_WARPS-1:0][NUM_REGS-1:0] busy
+  input wire logic [NUM_WARPS-1:0][NUM_REGS-1:0] busy
 );
 
   assert property (@(posedge clk)

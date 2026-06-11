@@ -2,8 +2,10 @@ module async_tile_prefetch #(
   parameter int unsigned NUM_WARPS = warpforge_pkg::NUM_WARPS,
   parameter int unsigned NUM_TILES = warpforge_pkg::NUM_TILES,
   parameter int unsigned QUEUE_DEPTH = warpforge_pkg::PREFETCH_QUEUE_DEPTH,
-  parameter int unsigned MAX_TRANSFER_WORDS = 16,
-  parameter int unsigned GLOBAL_ADDR_WIDTH = 32,
+  parameter int unsigned MAX_TRANSFER_WORDS =
+      warpforge_pkg::PREFETCH_MAX_TRANSFER_WORDS,
+  parameter int unsigned GLOBAL_ADDR_WIDTH =
+      warpforge_pkg::GLOBAL_ADDR_WIDTH,
   parameter int unsigned SHARED_ADDR_WIDTH =
       warpforge_pkg::SHARED_ADDR_WIDTH,
   parameter int unsigned DATA_WIDTH = warpforge_pkg::SHARED_DATA_WIDTH,

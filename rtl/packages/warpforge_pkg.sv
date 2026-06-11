@@ -10,12 +10,21 @@ package warpforge_pkg;
   parameter int unsigned SHARED_DATA_WIDTH = 32;
   parameter int unsigned SCALAR_DATA_WIDTH = 32;
   parameter int unsigned PREFETCH_QUEUE_DEPTH = 4;
+  parameter int unsigned PREFETCH_MAX_TRANSFER_WORDS = 16;
+  parameter int unsigned GLOBAL_ADDR_WIDTH = 32;
   parameter int unsigned TENSOR_M = 4;
   parameter int unsigned TENSOR_N = 4;
   parameter int unsigned TENSOR_K = 4;
   parameter int unsigned TENSOR_INPUT_WIDTH = 8;
   parameter int unsigned TENSOR_ACC_WIDTH = 32;
   parameter int unsigned TENSOR_PIPELINE_LATENCY = 1 + $clog2(TENSOR_K);
+  parameter int unsigned TENSOR_ELEMENTS_PER_WORD =
+      SHARED_DATA_WIDTH / TENSOR_INPUT_WIDTH;
+  parameter int unsigned TENSOR_TILE_ELEMENTS =
+      (TENSOR_M * TENSOR_K) + (TENSOR_K * TENSOR_N);
+  parameter int unsigned TENSOR_TILE_WORDS =
+      (TENSOR_TILE_ELEMENTS + TENSOR_ELEMENTS_PER_WORD - 1) /
+      TENSOR_ELEMENTS_PER_WORD;
   parameter int unsigned PERF_COUNTER_WIDTH = 64;
 
   localparam int unsigned WARP_ID_WIDTH = (NUM_WARPS > 1) ? $clog2(NUM_WARPS) : 1;

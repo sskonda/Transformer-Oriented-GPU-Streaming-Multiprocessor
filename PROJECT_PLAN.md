@@ -50,7 +50,7 @@ Verification is layered:
 - [x] Milestone 9: Architecture performance counters
 - [x] Milestone 10: Tensor core efficiency upgrade
 - [x] Milestone 11: Shared memory banking cleanup
-- [ ] Milestone 12: Top-level SM integration
+- [x] Milestone 12: Top-level SM integration
 - [ ] Milestone 13: Integrated UVM environment
 - [ ] Milestone 14: Directed and constrained-random regressions
 - [ ] Milestone 15: Assembly and workload tooling

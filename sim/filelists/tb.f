@@ -9,6 +9,7 @@
 ../../tb/assertions/instruction_queue_sva.sv
 ../../tb/assertions/scalar_alu_sva.sv
 ../../tb/assertions/perf_counters_sva.sv
+../../tb/assertions/top_sva.sv
 ../../tb/sv/scoreboard_tb.sv
 ../../tb/sv/scheduler_tb.sv
 ../../tb/sv/tensor_core_tb.sv
@@ -17,3 +18,4 @@
 ../../tb/sv/instruction_queue_tb.sv
 ../../tb/sv/scalar_alu_tb.sv
 ../../tb/sv/perf_counters_tb.sv
+../../tb/sv/warpforge_top_tb.sv
