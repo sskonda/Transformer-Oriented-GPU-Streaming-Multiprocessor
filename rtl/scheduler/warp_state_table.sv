@@ -23,23 +23,27 @@ module warp_state_table #(
 
   warp_state_e state_r [0:NUM_WARPS-1];
 
+  function automatic logic state_is_active(input warp_state_e warp_state);
+    return warp_state == WARP_ACTIVE ||
+           warp_state == WARP_WAIT_SCOREBOARD ||
+           warp_state == WARP_WAIT_TILE ||
+           warp_state == WARP_WAIT_TENSOR ||
+           warp_state == WARP_WAIT_BARRIER;
+  endfunction
+
+  function automatic logic state_is_waiting(input warp_state_e warp_state);
+    return warp_state == WARP_WAIT_SCOREBOARD ||
+           warp_state == WARP_WAIT_TILE ||
+           warp_state == WARP_WAIT_TENSOR ||
+           warp_state == WARP_WAIT_BARRIER;
+  endfunction
+
   always_comb begin
     for (int unsigned warp = 0; warp < NUM_WARPS; warp++) begin
       state[warp] = state_r[warp];
-      active[warp] = state_r[warp] inside {
-        WARP_ACTIVE,
-        WARP_WAIT_SCOREBOARD,
-        WARP_WAIT_TILE,
-        WARP_WAIT_TENSOR,
-        WARP_WAIT_BARRIER
-      };
+      active[warp] = state_is_active(state_r[warp]);
       done[warp] = state_r[warp] == WARP_DONE;
-      waiting[warp] = state_r[warp] inside {
-        WARP_WAIT_SCOREBOARD,
-        WARP_WAIT_TILE,
-        WARP_WAIT_TENSOR,
-        WARP_WAIT_BARRIER
-      };
+      waiting[warp] = state_is_waiting(state_r[warp]);
     end
   end
 
@@ -54,15 +58,12 @@ module warp_state_table #(
           state_r[warp] <= WARP_ERROR;
         end else if (done_set[warp]) begin
           state_r[warp] <= WARP_DONE;
-        end else if (activate_valid && activate_warp_id == warp) begin
+        end else if (
+          activate_valid &&
+          activate_warp_id == WARP_ID_WIDTH'(warp)
+        ) begin
           state_r[warp] <= WARP_ACTIVE;
-        end else if (state_r[warp] inside {
-          WARP_ACTIVE,
-          WARP_WAIT_SCOREBOARD,
-          WARP_WAIT_TILE,
-          WARP_WAIT_TENSOR,
-          WARP_WAIT_BARRIER
-        }) begin
+        end else if (state_is_active(state_r[warp])) begin
           if (barrier_wait[warp]) begin
             state_r[warp] <= WARP_WAIT_BARRIER;
           end else if (tensor_wait[warp]) begin

@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 
-module workload_gemm_tb;
+module workload_gemm_tb #(
+  parameter warpforge_pkg::tensor_arch_e TENSOR_ARCH =
+      warpforge_pkg::TENSOR_ARCH_PIPELINED_TREE
+);
   import warpforge_pkg::*;
 
   localparam time CLK_PERIOD = 10ns;
@@ -59,7 +62,9 @@ module workload_gemm_tb;
 
   always #(CLK_PERIOD / 2) clk = ~clk;
 
-  warpforge_top dut (
+  warpforge_top #(
+    .TENSOR_ARCH(TENSOR_ARCH)
+  ) dut (
     .clk,
     .rst,
     .clear,
@@ -207,37 +212,26 @@ module workload_gemm_tb;
           $fatal(1, "GEMM completion state was incorrect");
         end
         $display(
-          "%s",
-          $sformatf(
-            {
-              "WARPFORGE_PERF workload=gemm policy=SCHED_ROUND_ROBIN ",
-              "seed=%0d cycles=%0d issued=%0d scalar=%0d tensor=%0d ",
-              "prefetch=%0d scheduler_stall=%0d scoreboard_stall=%0d ",
-              "tile_wait=%0d tensor_wait=%0d prefetch_stall=%0d ",
-              "tensor_busy=%0d tensor_accepted=%0d tensor_completed=%0d ",
-              "bank_conflicts=%0d prefetch_requests=%0d ",
-              "prefetch_stalls=%0d completed_warps=%0d illegal=%0d"
-            },
-            WORKLOAD_SEED,
-            counters.total_cycles,
-            counters.issued_instructions,
-            counters.scalar_instructions,
-            counters.tensor_instructions,
-            counters.prefetch_instructions,
-            counters.scheduler_stall_cycles,
-            counters.scoreboard_stall_cycles,
-            counters.tile_wait_cycles,
-            counters.tensor_wait_cycles,
-            counters.prefetch_stall_cycles,
-            counters.tensor_busy_cycles,
-            counters.tensor_accepted,
-            counters.tensor_completed,
-            counters.bank_conflicts,
-            counters.prefetch_requests,
-            counters.prefetch_stalls,
-            counters.completed_warps,
-            counters.illegal_instructions
-          )
+          "WARPFORGE_PERF workload=gemm policy=SCHED_ROUND_ROBIN seed=%0d cycles=%0d issued=%0d scalar=%0d tensor=%0d prefetch=%0d scheduler_stall=%0d scoreboard_stall=%0d tile_wait=%0d tensor_wait=%0d prefetch_stall=%0d tensor_busy=%0d tensor_accepted=%0d tensor_completed=%0d bank_conflicts=%0d prefetch_requests=%0d prefetch_stalls=%0d completed_warps=%0d illegal=%0d",
+          WORKLOAD_SEED,
+          counters.total_cycles,
+          counters.issued_instructions,
+          counters.scalar_instructions,
+          counters.tensor_instructions,
+          counters.prefetch_instructions,
+          counters.scheduler_stall_cycles,
+          counters.scoreboard_stall_cycles,
+          counters.tile_wait_cycles,
+          counters.tensor_wait_cycles,
+          counters.prefetch_stall_cycles,
+          counters.tensor_busy_cycles,
+          counters.tensor_accepted,
+          counters.tensor_completed,
+          counters.bank_conflicts,
+          counters.prefetch_requests,
+          counters.prefetch_stalls,
+          counters.completed_warps,
+          counters.illegal_instructions
         );
         $display("workload_gemm_tb PASS");
         $finish;

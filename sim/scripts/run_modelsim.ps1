@@ -25,6 +25,7 @@ $unitTests = @{
   tensor_core_extreme_test = "tensor_core_tb"
   tensor_core_back_to_back_test = "tensor_core_tb"
   tensor_core_reset_mid_operation_test = "tensor_core_tb"
+  tensor_core_parameter_limits_test = "tensor_core_parameter_tb"
   shared_memory_basic_test = "shared_memory_tb"
   shared_memory_bank_conflict_test = "shared_memory_tb"
   shared_memory_read_after_write_test = "shared_memory_tb"
@@ -35,6 +36,8 @@ $unitTests = @{
   scalar_alu_basic_test = "scalar_alu_tb"
   perf_counter_basic_test = "perf_counters_tb"
   workload_gemm_test = "workload_gemm_tb"
+  workload_gemm_tree_test = "workload_gemm_tree_tb"
+  control_boundary_test = "warpforge_control_tb"
 }
 
 $uvmTests = @(
@@ -146,12 +149,15 @@ if ($Test -eq "all") {
   $unitRepresentatives = @(
     "scoreboard_dependency_test",
     "tensor_core_basic_test",
+    "tensor_core_parameter_limits_test",
     "shared_memory_basic_test",
     "prefetch_basic_test",
     "instruction_queue_load_issue_test",
     "scalar_alu_basic_test",
     "perf_counter_basic_test",
-    "workload_gemm_test"
+    "workload_gemm_test",
+    "workload_gemm_tree_test",
+    "control_boundary_test"
   )
   foreach ($testName in $unitRepresentatives + $uvmTests) {
     Invoke-WarpForgeTest $testName

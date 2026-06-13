@@ -28,13 +28,18 @@ module tensor_tile_buffer #(
 
   localparam int unsigned ELEMENTS_PER_WORD = DATA_WIDTH / INPUT_WIDTH;
   localparam int unsigned A_ELEMENTS = M * K;
+  localparam int unsigned TILE_WORD_INDEX_WIDTH =
+      (TILE_WORDS > 1) ? $clog2(TILE_WORDS) : 1;
+  localparam logic [WORD_INDEX_WIDTH-1:0] TILE_WORDS_LIMIT =
+      WORD_INDEX_WIDTH'(TILE_WORDS);
 
   logic [DATA_WIDTH-1:0] storage
       [0:NUM_WARPS-1][0:NUM_TILES-1][0:TILE_WORDS-1];
 
   always_ff @(posedge clk) begin
-    if (write_valid && write_word_index < TILE_WORDS) begin
-      storage[write_warp_id][write_tile_id][write_word_index]
+    if (write_valid && write_word_index < TILE_WORDS_LIMIT) begin
+      storage[write_warp_id][write_tile_id]
+          [TILE_WORD_INDEX_WIDTH'(write_word_index)]
           <= write_data;
     end
   end

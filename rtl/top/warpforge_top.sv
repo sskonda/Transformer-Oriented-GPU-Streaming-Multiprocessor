@@ -63,6 +63,10 @@ module warpforge_top #(
       NUM_WARPS * NUM_TILES * TENSOR_TILE_WORDS;
   localparam int unsigned SHARED_CONFLICT_COUNTER_WIDTH = 32;
   localparam int unsigned PERF_INCREMENT_WIDTH = 8;
+  localparam logic [WARP_ID_WIDTH:0] NUM_WARPS_LIMIT =
+      (WARP_ID_WIDTH + 1)'(NUM_WARPS);
+  localparam logic [REG_INDEX_WIDTH:0] NUM_REGS_LIMIT =
+      (REG_INDEX_WIDTH + 1)'(NUM_REGS);
 
   typedef struct packed {
     warp_id_t warp_id;
@@ -224,8 +228,8 @@ module warpforge_top #(
       !busy &&
       !rst &&
       !clear &&
-      reg_load_warp_id < NUM_WARPS &&
-      reg_load_reg_idx < NUM_REGS;
+      {1'b0, reg_load_warp_id} < NUM_WARPS_LIMIT &&
+      {1'b0, reg_load_reg_idx} < NUM_REGS_LIMIT;
 
   scalar_register_file register_file (
     .clk,
@@ -298,6 +302,7 @@ module warpforge_top #(
     .tile_wait,
     .tensor_wait,
     .prefetch_wait,
+    .barrier_wait,
     .tile_preferred,
     .issue_accept,
     .issue_valid(scheduler_issue_valid),
@@ -590,7 +595,10 @@ module warpforge_top #(
 
   assign prefetch_shared_addr =
       SHARED_ADDR_WIDTH'(
-        ((scheduler_warp_id * NUM_TILES) + selected_instruction.tile_id) *
+        (
+          (int'(scheduler_warp_id) * NUM_TILES) +
+          int'(selected_instruction.tile_id)
+        ) *
         TENSOR_TILE_WORDS
       );
   assign prefetch_length = PREFETCH_LENGTH_WIDTH'(TENSOR_TILE_WORDS);

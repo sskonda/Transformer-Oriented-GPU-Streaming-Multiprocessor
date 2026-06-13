@@ -14,6 +14,7 @@ module warp_scheduler #(
   input  logic [NUM_WARPS-1:0] tile_wait,
   input  logic [NUM_WARPS-1:0] tensor_wait,
   input  logic [NUM_WARPS-1:0] prefetch_wait,
+  input  logic [NUM_WARPS-1:0] barrier_wait,
   input  logic [NUM_WARPS-1:0] tile_preferred,
   input  logic issue_accept,
   output logic issue_valid,
@@ -35,7 +36,8 @@ module warp_scheduler #(
         ~scoreboard_stall &
         ~tile_wait &
         ~tensor_wait &
-        ~prefetch_wait;
+        ~prefetch_wait &
+        ~barrier_wait;
     preferred_ready = ready & tile_preferred;
     search_vector = ready;
     issue_valid = 1'b0;
@@ -50,7 +52,7 @@ module warp_scheduler #(
         SCHED_ROUND_ROBIN: begin
           for (int unsigned offset = 0; offset < NUM_WARPS; offset++) begin
             int unsigned candidate;
-            candidate = rr_pointer_r + offset;
+            candidate = int'(rr_pointer_r) + offset;
             if (candidate >= NUM_WARPS) begin
               candidate = candidate - NUM_WARPS;
             end
@@ -86,7 +88,7 @@ module warp_scheduler #(
       issue_valid &&
       issue_accept
     ) begin
-      if (selected_warp_id == NUM_WARPS - 1) begin
+      if (selected_warp_id == WARP_ID_WIDTH'(NUM_WARPS - 1)) begin
         rr_pointer_r <= '0;
       end else begin
         rr_pointer_r <= selected_warp_id + 1'b1;
@@ -117,6 +119,7 @@ module warp_scheduler #(
     .tile_wait,
     .tensor_wait,
     .prefetch_wait,
+    .barrier_wait,
     .issue_valid,
     .selected_warp_id,
     .ready,

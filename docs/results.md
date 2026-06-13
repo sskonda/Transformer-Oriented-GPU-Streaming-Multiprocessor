@@ -4,6 +4,10 @@ The checked CSV files were extracted from ModelSim Intel FPGA Starter 20.1
 simulation logs on June 11, 2026, using the default architecture parameters
 and seed 17.
 
+The June 13, 2026 Verilator audit reproduced the pipelined GEMM counters and
+also executed the tree tensor architecture. These results are kept separate
+from the checked ModelSim CSV files.
+
 ## GEMM
 
 | Metric | Value |
@@ -16,6 +20,16 @@ and seed 17.
 | Tensor busy cycles | 3 |
 | Tensor busy utilization | 9.375% |
 | Bank conflicts | 0 |
+
+## Tensor Architecture Comparison
+
+| Architecture | Cycles | Tensor busy cycles | Result |
+| --- | ---: | ---: | --- |
+| Pipelined tree | 32 | 3 | Passed |
+| Registered tree | 30 | 1 | Passed |
+
+This comparison measures architectural cycle accounting in the current model.
+It does not establish clock frequency, throughput per second, area, or power.
 
 ## Scheduler Comparison
 
@@ -31,4 +45,5 @@ ranking.
 
 These are architectural simulation counters. They are not clock-frequency,
 synthesis, area, power, FPGA, or silicon measurements. Raw CSV data and
-regeneration commands are in `results/`.
+regeneration commands are in `results/`. The complete audit evidence and
+limitations are in `audit_report_2026-06-13.md`.

@@ -114,19 +114,21 @@ package warpforge_pkg;
   endfunction
 
   function automatic logic opcode_is_scalar(input opcode_e opcode);
-    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD};
+    return opcode == OP_ALU_ADD ||
+           opcode == OP_ALU_MUL ||
+           opcode == OP_ALU_MAD;
   endfunction
 
   function automatic logic opcode_writes_register(input opcode_e opcode);
-    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD, OP_TENSOR_MMA};
+    return opcode_is_scalar(opcode) || opcode == OP_TENSOR_MMA;
   endfunction
 
   function automatic logic opcode_uses_src0(input opcode_e opcode);
-    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD};
+    return opcode_is_scalar(opcode);
   endfunction
 
   function automatic logic opcode_uses_src1(input opcode_e opcode);
-    return opcode inside {OP_ALU_ADD, OP_ALU_MUL, OP_ALU_MAD};
+    return opcode_is_scalar(opcode);
   endfunction
 
   function automatic logic opcode_uses_src2(input opcode_e opcode);
@@ -134,17 +136,13 @@ package warpforge_pkg;
   endfunction
 
   function automatic logic opcode_is_legal(input opcode_e opcode);
-    return opcode inside {
-      OP_NOP,
-      OP_ALU_ADD,
-      OP_ALU_MUL,
-      OP_ALU_MAD,
-      OP_TENSOR_MMA,
-      OP_PREFETCH_TILE,
-      OP_WAIT_TILE,
-      OP_BARRIER,
-      OP_END
-    };
+    return opcode == OP_NOP ||
+           opcode_is_scalar(opcode) ||
+           opcode == OP_TENSOR_MMA ||
+           opcode == OP_PREFETCH_TILE ||
+           opcode == OP_WAIT_TILE ||
+           opcode == OP_BARRIER ||
+           opcode == OP_END;
   endfunction
 
 endpackage

@@ -40,6 +40,13 @@ covergroups, native constrained randomization, or concurrent assertions under
 its license. No functional coverage percentage is claimed. No synthesis,
 timing, power, FPGA utilization, or silicon result is claimed.
 
+On June 13, 2026, a separate Verilator 5.020 audit passed all 13 direct
+simulation targets and 1,300 repeated binary executions. It also identified
+and fixed barrier gating, tree-mode handshake, duplicate-prefetch, parameter
+indexing, and tensor accumulator-width defects. See the
+[audit report](docs/audit_report_2026-06-13.md) for the complete findings and
+limitations.
+
 ## Architecture
 
 ```mermaid
@@ -163,7 +170,8 @@ row-major order.
 
 Two implemented modes are available:
 
-- `TENSOR_ARCH_TREE`: balanced combinational reduction
+- `TENSOR_ARCH_TREE`: balanced combinational reduction with a one-entry
+  elastic output register
 - `TENSOR_ARCH_PIPELINED_TREE`: elastic product and reduction stages
 
 The pipelined tree is the default and accepts one operation per cycle when
@@ -181,8 +189,10 @@ priority and count denied requests.
 The prefetch engine queues warp ID, tile ID, global base word address, shared
 base address, and length. It transfers one word at a time through valid/ready
 channels and marks a tile valid only after the final shared-memory write is
-accepted. Duplicate pending or valid tiles are rejected unless overwrite is
-enabled. See [shared_memory.md](docs/shared_memory.md) and
+accepted. Duplicate pending requests wait for the original transfer; a
+program-level prefetch of an already-valid tile retires as an idempotent
+no-op. The engine itself rejects duplicate pending or valid requests unless
+overwrite is enabled. See [shared_memory.md](docs/shared_memory.md) and
 [prefetch_engine.md](docs/prefetch_engine.md).
 
 ## Performance Counters
@@ -247,12 +257,15 @@ percentage is reported.
 Direct self-checking benches cover:
 
 - Scoreboard dependencies and simultaneous set/clear
-- Scheduler policy selection
-- Tensor positive, signed, zero, extreme, back-to-back, backpressure, and reset
+- Scheduler policy selection and barrier eligibility filtering
+- Tensor positive, signed, zero, extreme, back-to-back, backpressure, reset,
+  both architectures, and `K = 1, 3, 5` parameter limits
 - Shared-memory banking, conflicts, read-after-write, and reset
-- Prefetch transfer, full queue, backpressure, and reset
+- Prefetch transfer, full queue, backpressure, reset, and idempotent
+  already-valid tile handling
 - Instruction queue, scalar ALU, and performance counters
-- Integrated top-level execution and file-driven GEMM
+- Integrated top-level execution, barrier/prefetch control boundaries, and
+  file-driven GEMM with both tensor architectures
 
 Integrated UVM tests cover scheduler policies, single- and multi-warp
 execution, barriers, reset recovery, illegal instructions, variable memory
@@ -288,6 +301,16 @@ SEED=17 \
 VCS and Xcelium entry points are provided in `sim/scripts`, but were not run
 in the local environment. See [regression.md](docs/regression.md).
 
+### Verilator
+
+```bash
+./sim/scripts/run_verilator_regression.sh
+```
+
+This builds and runs all 13 direct targets in isolated build directories.
+The June 13, 2026 audit also repeated every generated simulation binary 100
+times.
+
 ### Python Tools
 
 ```bash
@@ -314,6 +337,11 @@ The checked ModelSim seed-17 GEMM completed in 32 counted cycles with one
 tensor operation, one prefetch, no bank conflicts, and 9.375 percent tensor
 busy-cycle utilization.
 
+The Verilator audit reproduced the pipelined result and ran the same workload
+with tree mode. Tree mode completed in 30 counted cycles with one tensor-busy
+cycle; this is an architectural simulation comparison, not a timing or area
+result.
+
 The round-robin, greedy, and memory-aware scheduler smoke runs each completed
 in 40 counted cycles with 33 aggregate tile-wait cycles and 7.5 percent tensor
 busy-cycle utilization. This small workload validates counter and policy
@@ -329,7 +357,8 @@ dimensions and widths, and counter width.
 To change tensor dimensions, update `TENSOR_M`, `TENSOR_N`, and `TENSOR_K`,
 then regenerate tile data and rerun tensor, prefetch, top, and workload tests.
 The shared-memory capacity and maximum prefetch length elaboration checks must
-still pass.
+still pass. `TENSOR_ACC_WIDTH` must be at least
+`2 * TENSOR_INPUT_WIDTH + ceil(log2(TENSOR_K))`.
 
 To change the number of warps, update `NUM_WARPS` and rerun scheduler,
 scoreboard, state-table, top, UVM, and long-random tests.
@@ -342,7 +371,8 @@ model, coverage, assertions, and directed tests.
 
 - No cache hierarchy, coalescer, register-file banking, divergence stack, or
   reconvergence mechanism
-- One instruction issue per cycle and a simplified barrier
+- One instruction issue per cycle and one global barrier domain without
+  barrier IDs or independent barrier generations
 - One packed A/B tile operand per tensor instruction
 - Only matrix element `[0][0]` is written into the scalar register file;
   the full matrix is exposed on the result interface
@@ -350,6 +380,8 @@ model, coverage, assertions, and directed tests.
 - Memory-aware scheduling uses tile-ready priority only
 - MLP and transformer examples are not compiled into RTL programs
 - No coverage percentage from a coverage-capable simulator
+- No formal proof or commercial-simulator UVM/assertion run from the June 13
+  audit environment
 - No synthesis, timing closure, power, area, FPGA, or silicon data
 
 ## Future Work

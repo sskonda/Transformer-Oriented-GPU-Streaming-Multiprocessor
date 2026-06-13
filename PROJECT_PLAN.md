@@ -6,7 +6,7 @@ WarpForge is a simplified transformer-oriented GPU Streaming Multiprocessor. It 
 
 ## Architecture Summary
 
-The Streaming Multiprocessor maintains multiple independent warps and issues one instruction per cycle when a legal warp is available. A scheduler filters inactive, completed, dependency-stalled, tile-stalled, and resource-stalled warps. Scalar operations use a compact ALU path, while matrix operations use a signed low-precision tensor datapath. A queued prefetch engine transfers tiles from a modeled global-memory interface into banked shared memory. Performance counters expose utilization and stall behavior.
+The Streaming Multiprocessor maintains multiple independent warps and issues one instruction per cycle when a legal warp is available. A scheduler filters inactive, completed, barrier-waiting, dependency-stalled, tile-stalled, and resource-stalled warps. Scalar operations use a compact ALU path, while matrix operations use a signed low-precision tensor datapath. A queued prefetch engine transfers tiles from a modeled global-memory interface into banked shared memory. Performance counters expose utilization and stall behavior.
 
 ## Module List
 
@@ -59,6 +59,7 @@ Verification is layered:
 - [x] Milestone 18: CI and lint support
 - [x] Milestone 19: Architecture and verification documentation
 - [x] Milestone 20: Final integration cleanup
+- [x] Milestone 21: Open-source simulator audit and control-path hardening
 
 ## Commit Plan
 
@@ -76,7 +77,7 @@ Each completed milestone is committed directly to `main` after available checks 
 
 - Full verification targets a simulator with SystemVerilog and UVM support, such as Questa, VCS, or Xcelium.
 - ModelSim Intel FPGA Starter Edition is available for RTL compilation and non-UVM smoke tests.
-- Verilator support, if added, is limited to lint or a non-UVM smoke test unless full UVM capability is demonstrated.
+- Verilator supports lint and the complete 13-target direct regression. UVM, functional coverage, and the concurrent-assertion suite still require a compatible commercial simulator.
 
 ## Risks And Mitigation
 

@@ -22,13 +22,18 @@ With the default register and tile counts, the instruction is 42 bits.
 | `0x2` | `ALU_MUL` | `dst, src0, src1` | Low-width signed product |
 | `0x3` | `ALU_MAD` | `dst, src0, src1, src2` | Low-width multiply-add |
 | `0x4` | `TENSOR_MMA` | `dst, tile_id` | Signed tiled matrix product |
-| `0x5` | `PREFETCH_TILE` | `tile_id, immediate` | Queue tile transfer |
+| `0x5` | `PREFETCH_TILE` | `tile_id, immediate` | Queue tile transfer, or retire if the tile is already valid |
 | `0x6` | `WAIT_TILE` | `tile_id` | Wait for tile validity |
 | `0x7` | `BARRIER` | none | All-launched-warp barrier |
 | `0x8` | `END` | none | Mark warp complete |
 | `0xf` | `ILLEGAL` | none | Mark warp error |
 
 Other opcode encodings are illegal.
+
+When overwrite is disabled, a prefetch for an already-valid warp-local tile
+is architecturally idempotent: the instruction advances without generating a
+second engine request. A duplicate request for a tile still being transferred
+waits for the original transfer to complete.
 
 ## PC Rules
 

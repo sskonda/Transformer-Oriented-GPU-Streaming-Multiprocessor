@@ -55,7 +55,8 @@ module shared_memory #(
   );
     logic [COUNTER_WIDTH:0] sum;
 
-    sum = {1'b0, value} + increment;
+    sum = {1'b0, value} +
+        {{(COUNTER_WIDTH + 1 - LOSER_COUNT_WIDTH){1'b0}}, increment};
     return sum[COUNTER_WIDTH]
         ? {COUNTER_WIDTH{1'b1}}
         : sum[COUNTER_WIDTH-1:0];
@@ -74,7 +75,7 @@ module shared_memory #(
       for (int unsigned port = 0; port < NUM_PORTS; port++) begin
         if (
           req_valid[port] &&
-          address_bank(req_addr[port]) == bank
+          address_bank(req_addr[port]) == BANK_INDEX_WIDTH'(bank)
         ) begin
           if (!bank_valid[bank]) begin
             req_ready[port] = 1'b1;

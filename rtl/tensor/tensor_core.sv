@@ -22,10 +22,14 @@ module tensor_core #(
   import warpforge_pkg::*;
 
   localparam int unsigned PIPELINE_STAGES = 1 + $clog2(K);
+  localparam int unsigned MIN_ACC_WIDTH =
+      (2 * INPUT_WIDTH) + ((K > 1) ? $clog2(K) : 0);
 
   generate
     if (TENSOR_ARCH == TENSOR_ARCH_TREE) begin : g_tree
       logic signed [M-1:0][N-1:0][ACC_WIDTH-1:0] result;
+      logic signed [M-1:0][N-1:0][ACC_WIDTH-1:0] result_r;
+      logic valid_r;
 
       tensor_core_tree #(
         .M(M),
@@ -39,10 +43,21 @@ module tensor_core #(
         .matrix_c(result)
       );
 
-      assign in_ready = out_ready && !rst && !clear;
-      assign out_valid = in_valid && !rst && !clear;
-      assign matrix_c = result;
-      assign busy = out_valid;
+      assign in_ready = (!valid_r || out_ready) && !rst && !clear;
+      assign out_valid = valid_r && !rst && !clear;
+      assign matrix_c = result_r;
+      assign busy = valid_r;
+
+      always_ff @(posedge clk) begin
+        if (rst || clear) begin
+          valid_r <= 1'b0;
+        end else if (in_ready) begin
+          valid_r <= in_valid;
+          if (in_valid) begin
+            result_r <= result;
+          end
+        end
+      end
     end else if (TENSOR_ARCH == TENSOR_ARCH_PIPELINED_TREE) begin : g_pipeline
       tensor_core_pipelined_tree #(
         .M(M),
@@ -75,7 +90,7 @@ module tensor_core #(
     if (M == 0 || N == 0 || K == 0) begin
       $fatal(1, "tensor_core dimensions must be greater than zero");
     end
-    if (INPUT_WIDTH == 0 || ACC_WIDTH < (2 * INPUT_WIDTH)) begin
+    if (INPUT_WIDTH == 0 || ACC_WIDTH < MIN_ACC_WIDTH) begin
       $fatal(1, "tensor_core arithmetic widths are invalid");
     end
     if (TENSOR_ARCH == TENSOR_ARCH_SYSTOLIC) begin

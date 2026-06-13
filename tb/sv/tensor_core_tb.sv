@@ -118,7 +118,7 @@ module tensor_core_tb;
   task automatic set_identity_b(input int signed diagonal);
     matrix_b = '0;
     for (int unsigned index = 0; index < TENSOR_K; index++) begin
-      matrix_b[index][index] = diagonal;
+      matrix_b[index][index] = tensor_input_t'(diagonal);
     end
   endtask
 
@@ -136,7 +136,7 @@ module tensor_core_tb;
 
     for (int unsigned row = 0; row < TENSOR_M; row++) begin
       for (int unsigned col = 0; col < TENSOR_K; col++) begin
-        matrix_a[row][col] = row + col + 1;
+        matrix_a[row][col] = tensor_input_t'(row + col + 1);
       end
     end
     set_identity_b(1);
@@ -144,7 +144,7 @@ module tensor_core_tb;
 
     for (int unsigned row = 0; row < TENSOR_M; row++) begin
       for (int unsigned col = 0; col < TENSOR_K; col++) begin
-        matrix_a[row][col] = $signed(row + col) - 3;
+        matrix_a[row][col] = tensor_input_t'($signed(row + col) - 3);
       end
     end
     set_identity_b(-1);
@@ -157,12 +157,12 @@ module tensor_core_tb;
     matrix_b = '0;
     for (int unsigned row = 0; row < TENSOR_M; row++) begin
       for (int unsigned inner = 0; inner < TENSOR_K; inner++) begin
-        matrix_a[row][inner] = INPUT_MAX;
+        matrix_a[row][inner] = tensor_input_t'(INPUT_MAX);
       end
     end
     for (int unsigned inner = 0; inner < TENSOR_K; inner++) begin
       for (int unsigned col = 0; col < TENSOR_N; col++) begin
-        matrix_b[inner][col] = INPUT_MAX;
+        matrix_b[inner][col] = tensor_input_t'(INPUT_MAX);
       end
     end
     send_and_check("extreme");
@@ -211,13 +211,17 @@ module tensor_core_tb;
     matrix_b = '1;
     tree_in_valid = 1'b1;
     @(posedge clk);
-    if (!tree_in_ready || !tree_out_valid || !tree_busy) begin
-      $fatal(1, "tree mode handshake failed");
+    @(negedge clk);
+    tree_in_valid = 1'b0;
+    if (!tree_out_valid || !tree_busy) begin
+      $fatal(1, "tree mode output stage did not capture the operation");
     end
     calculate_expected(expected);
     check_result("tree", tree_matrix_c, expected);
     @(negedge clk);
-    tree_in_valid = 1'b0;
+    if (tree_out_valid || tree_busy) begin
+      $fatal(1, "tree mode output stage did not drain");
+    end
 
     in_valid = 1'b1;
     @(negedge clk);

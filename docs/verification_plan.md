@@ -7,8 +7,10 @@ failures are separated from integrated architectural failures.
 
 Self-checking direct tests cover the scoreboard, scheduler, tensor core,
 shared memory, prefetch engine, instruction queue, scalar ALU, performance
-counters, and integrated top level. These tests use deterministic clocks and
-drive inputs away from the active clock edge.
+counters, and integrated top level. Boundary tests specifically cover barrier
+scheduler gating, duplicate prefetch completion, both tensor architectures,
+and tensor `K = 1, 3, 5` parameter limits. These tests use deterministic
+clocks and drive inputs away from the active clock edge.
 
 ## Assertions
 
@@ -44,6 +46,11 @@ unit benches, the file-driven GEMM workload, and fourteen integrated UVM
 tests. Named aliases in `sim/test_manifest.csv` map more detailed test-plan
 names onto the self-checking unit benches that contain those cases.
 
+The open-source Verilator regression builds 13 direct simulation targets.
+During the June 13, 2026 audit, all targets passed and each generated binary
+was repeated 100 times, for 1,300 successful executions. The run does not
+replace the UVM, assertion, or functional-coverage plan.
+
 ## Simulator capability
 
 ModelSim Intel FPGA Starter Edition can run the deterministic UVM environment
@@ -54,3 +61,8 @@ execution target Questa, VCS, or Xcelium.
 
 No coverage percentage is claimed until a coverage-capable simulator produces
 the corresponding database.
+
+Icarus Verilog 12.0 additionally runs the scheduler, shared-memory, and
+performance-counter benches. Its elaborator cannot handle the packed
+multidimensional dynamic indexing used by the tensor, prefetch, and integrated
+interfaces, so those targets use Verilator or a commercial simulator.

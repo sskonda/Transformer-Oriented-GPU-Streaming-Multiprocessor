@@ -6,4 +6,10 @@ Instructions are loaded through a valid/ready interface before execution. Reset 
 
 The current instruction and validity are presented for every warp. A program counter advances only when the scheduler selects that warp and the issue transaction is accepted. `END` and illegal opcodes halt the selected warp without advancing. A non-terminating instruction at the final address sets `pc_error` and halts the warp, preventing an out-of-range access.
 
+Issue readiness includes scoreboard hazards, destination write-after-write
+hazards, tile validity, tensor and metadata capacity, prefetch capacity, and
+barrier wait state. An already-valid `PREFETCH_TILE` is accepted without
+creating another engine request, which makes repeated program-level prefetches
+idempotent.
+
 Instruction loading and execution are intended to occur in separate phases. The integrated top level does not issue while programs are being loaded.

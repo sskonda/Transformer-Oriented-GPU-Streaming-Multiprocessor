@@ -31,6 +31,8 @@ module perf_counters #(
 
   perf_counters_t counters_r;
   logic [PERF_COUNTER_WIDTH-1:0] completed_increment;
+  localparam logic [PERF_COUNTER_WIDTH-1:0] NUM_WARPS_COUNT =
+      PERF_COUNTER_WIDTH'(NUM_WARPS);
 
   function automatic logic [PERF_COUNTER_WIDTH-1:0] saturating_add(
     input logic [PERF_COUNTER_WIDTH-1:0] value,
@@ -48,7 +50,8 @@ module perf_counters #(
     completed_increment = '0;
     for (int unsigned warp = 0; warp < NUM_WARPS; warp++) begin
       completed_increment =
-          completed_increment + event_warp_completed[warp];
+          completed_increment +
+          PERF_COUNTER_WIDTH'(event_warp_completed[warp]);
     end
   end
 
@@ -110,7 +113,10 @@ module perf_counters #(
       end
       if (bank_conflict_increment != '0) begin
         counters_r.bank_conflicts <=
-            saturating_add(counters_r.bank_conflicts, bank_conflict_increment);
+            saturating_add(
+              counters_r.bank_conflicts,
+              PERF_COUNTER_WIDTH'(bank_conflict_increment)
+            );
       end
       if (event_prefetch_request) begin
         counters_r.prefetch_requests <=
@@ -122,9 +128,9 @@ module perf_counters #(
       end
       if (completed_increment != '0) begin
         if (
-          counters_r.completed_warps + completed_increment >= NUM_WARPS
+          counters_r.completed_warps + completed_increment >= NUM_WARPS_COUNT
         ) begin
-          counters_r.completed_warps <= NUM_WARPS;
+          counters_r.completed_warps <= NUM_WARPS_COUNT;
         end else begin
           counters_r.completed_warps <=
               counters_r.completed_warps + completed_increment;

@@ -16,6 +16,7 @@ module scheduler_tb;
   logic [NUM_WARPS-1:0] tile_wait;
   logic [NUM_WARPS-1:0] tensor_wait;
   logic [NUM_WARPS-1:0] prefetch_wait;
+  logic [NUM_WARPS-1:0] barrier_wait;
   logic [NUM_WARPS-1:0] tile_preferred;
   logic issue_accept;
   logic issue_valid;
@@ -37,6 +38,7 @@ module scheduler_tb;
     .tile_wait,
     .tensor_wait,
     .prefetch_wait,
+    .barrier_wait,
     .tile_preferred,
     .issue_accept,
     .issue_valid,
@@ -69,6 +71,7 @@ module scheduler_tb;
     tile_wait = '0;
     tensor_wait = '0;
     prefetch_wait = '0;
+    barrier_wait = '0;
     tile_preferred = '0;
     issue_accept = 1'b0;
 
@@ -92,6 +95,10 @@ module scheduler_tb;
     scoreboard_stall[0] = 1'b1;
     scoreboard_stall[2] = 1'b1;
     check_issue(warp_id_t'(1));
+
+    barrier_wait[1] = 1'b1;
+    check_issue(warp_id_t'(3));
+    barrier_wait = '0;
 
     policy = SCHED_MEMORY_AWARE;
     scoreboard_stall = '0;

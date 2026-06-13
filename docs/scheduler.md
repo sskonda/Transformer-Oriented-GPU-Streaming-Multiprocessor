@@ -2,8 +2,8 @@
 
 The scheduler builds a ready vector from active state, instruction validity,
 scoreboard dependencies, tile waits, tensor availability, and prefetch
-backpressure. A warp is selectable only when every blocking condition is
-clear.
+backpressure. Barrier-arrived warps are also masked until barrier release. A
+warp is selectable only when every blocking condition is clear.
 
 ## Round Robin
 
@@ -31,6 +31,8 @@ gain.
 
 ## Verification
 
-Direct tests check ready filtering, round-robin wrap, greedy priority, and
-tile preference. Integrated UVM tests run the same mixed scalar/tensor
-workload under each policy and emit comparable performance records.
+Direct tests check ready filtering, round-robin wrap, greedy priority, tile
+preference, and barrier masking. An integrated greedy-policy boundary test
+checks that a lower-numbered warp cannot issue beyond an unreleased barrier.
+Integrated UVM tests run the same mixed scalar/tensor workload under each
+policy and emit comparable performance records.

@@ -7,7 +7,9 @@ matrix A and matrix B into eight 32-bit words, emits a four-instruction
 program, and writes Python golden results.
 
 `workload_gemm_tb` loads those files into the integrated top, services global
-memory requests, and compares all sixteen tensor outputs.
+memory requests, and compares all sixteen tensor outputs. The workload runs
+against both `TENSOR_ARCH_PIPELINED_TREE` and `TENSOR_ARCH_TREE` in the direct
+Verilator regression.
 
 ## Reduced MNIST-Style MLP
 

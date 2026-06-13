@@ -7,7 +7,8 @@ resident warps and shared scalar, tensor, and memory resources.
 
 1. Verification software loads instructions and optional scalar register data.
 2. `start` captures every warp with a valid instruction at PC zero.
-3. The scheduler selects one legal warp.
+3. The scheduler selects one legal warp that is not blocked by a barrier,
+   dependency, tile, prefetch, or execution-resource wait.
 4. Issue control checks dependencies, tile readiness, and downstream capacity.
 5. An accepted instruction advances only that warp's PC.
 6. Scalar or tensor destinations enter the scoreboard.
@@ -66,6 +67,14 @@ Issue debug identifies the accepted instruction and warp. Scalar result debug
 reports one register writeback. Tensor result debug reports the full matrix,
 warp ID, and destination. Tensor writeback also places matrix element `[0][0]`
 in the scalar register file.
+
+`BARRIER` records the issuing warp as arrived and removes it from scheduler
+eligibility. The barrier releases when every launched, nonterminal warp has
+arrived; terminal warps do not prevent release.
+
+A `PREFETCH_TILE` targeting an already-valid warp-local tile retires without
+issuing another memory transaction. A request for a tile whose original
+transfer is still pending remains blocked until that transfer completes.
 
 ## Deterministic Priorities
 

@@ -8,12 +8,15 @@ SEED="${SEED:-1}"
 TESTS=(
   scoreboard_dependency_test
   tensor_core_basic_test
+  tensor_core_parameter_limits_test
   shared_memory_basic_test
   prefetch_basic_test
   instruction_queue_load_issue_test
   scalar_alu_basic_test
   perf_counter_basic_test
   workload_gemm_test
+  workload_gemm_tree_test
+  control_boundary_test
   sanity_smoke_test
   scheduler_round_robin_test
   scheduler_greedy_test

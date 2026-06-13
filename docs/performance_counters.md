@@ -28,4 +28,9 @@
 
 Every field increments only from an explicit event input. Counters are monotonic until reset or clear. `completed_warps` saturates at `NUM_WARPS` so an integration error cannot expose an architecturally impossible value.
 
+`issued_instructions` counts every accepted architectural instruction. The
+`prefetch_instructions` and `prefetch_requests` fields count requests actually
+dispatched to and accepted by the prefetch engine, so an idempotent
+already-valid `PREFETCH_TILE` increments only `issued_instructions`.
+
 Tensor utilization can be calculated as `tensor_busy_cycles / total_cycles` or `tensor_accepted / total_cycles`, depending on whether occupancy or accepted-operation rate is desired.

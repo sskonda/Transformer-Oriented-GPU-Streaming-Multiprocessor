@@ -48,7 +48,7 @@ module warpforge_run_control (
         launch_index <= '0;
         start_seen <= 1'b1;
       end else if (launch_pending) begin
-        if (launch_index == NUM_WARPS - 1) begin
+        if (launch_index == warp_id_t'(NUM_WARPS - 1)) begin
           launch_pending <= 1'b0;
         end else begin
           launch_index <= launch_index + 1'b1;

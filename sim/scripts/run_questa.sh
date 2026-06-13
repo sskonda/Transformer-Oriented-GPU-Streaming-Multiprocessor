@@ -24,6 +24,10 @@ case "$TEST" in
     TOP=tensor_core_tb
     MODE=unit
     ;;
+  tensor_core_parameter_limits_test)
+    TOP=tensor_core_parameter_tb
+    MODE=unit
+    ;;
   shared_memory_basic_test|shared_memory_bank_conflict_test|shared_memory_read_after_write_test)
     TOP=shared_memory_tb
     MODE=unit
@@ -44,8 +48,16 @@ case "$TEST" in
     TOP=perf_counters_tb
     MODE=unit
     ;;
-  workload_gemm_test)
-    TOP=workload_gemm_tb
+  workload_gemm_test|workload_gemm_tree_test)
+    if [[ "$TEST" == "workload_gemm_tree_test" ]]; then
+      TOP=workload_gemm_tree_tb
+    else
+      TOP=workload_gemm_tb
+    fi
+    MODE=unit
+    ;;
+  control_boundary_test)
+    TOP=warpforge_control_tb
     MODE=unit
     ;;
   *)

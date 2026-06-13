@@ -39,12 +39,18 @@ module instruction_queue #(
   logic [NUM_WARPS-1:0] pc_error_r;
   logic [NUM_WARPS-1:0] end_issued_r;
   logic [NUM_WARPS-1:0] illegal_issued_r;
+  localparam logic [WARP_ID_WIDTH:0] NUM_WARPS_LIMIT =
+      (WARP_ID_WIDTH + 1)'(NUM_WARPS);
+  localparam logic [ADDR_WIDTH:0] DEPTH_LIMIT =
+      (ADDR_WIDTH + 1)'(DEPTH);
+  localparam logic [ADDR_WIDTH-1:0] LAST_ADDR =
+      ADDR_WIDTH'(DEPTH - 1);
 
   always_comb begin
     load_ready =
         !rst &&
-        load_warp_id < NUM_WARPS &&
-        load_addr < DEPTH;
+        {1'b0, load_warp_id} < NUM_WARPS_LIMIT &&
+        {1'b0, load_addr} < DEPTH_LIMIT;
 
     for (int unsigned warp = 0; warp < NUM_WARPS; warp++) begin
       current_instruction[warp] = instruction_mem[warp][pc_r[warp]];
@@ -89,7 +95,7 @@ module instruction_queue #(
         end else if (current_illegal[issue_warp_id]) begin
           halted_r[issue_warp_id] <= 1'b1;
           illegal_issued_r[issue_warp_id] <= 1'b1;
-        end else if (pc_r[issue_warp_id] == DEPTH - 1) begin
+        end else if (pc_r[issue_warp_id] == LAST_ADDR) begin
           halted_r[issue_warp_id] <= 1'b1;
           pc_error_r[issue_warp_id] <= 1'b1;
         end else begin

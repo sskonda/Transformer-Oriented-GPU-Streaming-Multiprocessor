@@ -13,6 +13,7 @@ module scheduler_sva #(
   input logic [NUM_WARPS-1:0] tile_wait,
   input logic [NUM_WARPS-1:0] tensor_wait,
   input logic [NUM_WARPS-1:0] prefetch_wait,
+  input logic [NUM_WARPS-1:0] barrier_wait,
   input logic issue_valid,
   input logic [WARP_ID_WIDTH-1:0] selected_warp_id,
   input logic [NUM_WARPS-1:0] ready,
@@ -35,12 +36,15 @@ module scheduler_sva #(
     issue_valid |-> !scoreboard_stall[selected_warp_id] &&
                     !tile_wait[selected_warp_id] &&
                     !tensor_wait[selected_warp_id] &&
-                    !prefetch_wait[selected_warp_id]);
+                    !prefetch_wait[selected_warp_id] &&
+                    !barrier_wait[selected_warp_id]);
 
   assert property (@(posedge clk)
     round_robin_pointer < NUM_WARPS);
 
   assert property (@(posedge clk)
-    policy inside {SCHED_ROUND_ROBIN, SCHED_GREEDY, SCHED_MEMORY_AWARE});
+    policy == SCHED_ROUND_ROBIN ||
+    policy == SCHED_GREEDY ||
+    policy == SCHED_MEMORY_AWARE);
 
 endmodule

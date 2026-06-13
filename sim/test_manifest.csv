@@ -11,6 +11,7 @@ tensor_core_zero_test,direct,tensor_core_tb,zero operands
 tensor_core_extreme_test,direct,tensor_core_tb,INT8 limits
 tensor_core_back_to_back_test,direct,tensor_core_tb,back-to-back requests
 tensor_core_reset_mid_operation_test,direct,tensor_core_tb,reset during operation
+tensor_core_parameter_limits_test,direct,tensor_core_parameter_tb,K values 1 3 and 5 in both architectures
 shared_memory_basic_test,direct,shared_memory_tb,multi-bank access
 shared_memory_bank_conflict_test,direct,shared_memory_tb,deterministic conflict arbitration
 shared_memory_read_after_write_test,direct,shared_memory_tb,read-after-write behavior
@@ -23,6 +24,7 @@ perf_counter_basic_test,direct,perf_counters_tb,event accounting and clear
 top_single_warp_gemm_test,uvm,tb_top,single-warp tiled matrix operation
 top_multi_warp_contention_test,uvm,tb_top,scalar and tensor warp contention
 barrier_synchronization_test,uvm,tb_top,multi-warp barrier release
+control_boundary_test,direct,warpforge_control_tb,barrier gating and duplicate prefetch completion
 reset_mid_operation_test,uvm,tb_top,integrated clear and restart
 illegal_instruction_test,uvm,tb_top,illegal opcode error completion
 constrained_random_instruction_test,uvm,tb_top,seeded legal scalar programs
@@ -31,3 +33,4 @@ random_memory_latency_test,uvm,tb_top,variable response latency
 random_backpressure_test,uvm,tb_top,request ready backpressure
 long_regression_test,uvm,tb_top,long seeded four-warp program
 workload_gemm_test,direct,workload_gemm_tb,file-driven integrated 4x4 INT8 GEMM
+workload_gemm_tree_test,direct,workload_gemm_tree_tb,file-driven GEMM with tree tensor architecture

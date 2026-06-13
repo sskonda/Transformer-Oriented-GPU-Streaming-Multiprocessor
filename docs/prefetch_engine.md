@@ -23,6 +23,7 @@ The request queue uses a valid/ready interface. `req_ready` is low when:
 - The queue cannot accept another request
 - The requested tile is already pending
 - The requested tile is valid and overwrite is disabled
+- The encoded warp or tile ID is outside the implemented parameter range
 - The request length is invalid
 - Reset or clear is asserted
 
@@ -41,6 +42,15 @@ The memory model must not return a response in the same cycle that a read reques
 ## Tile Validity
 
 Tile status is tracked independently for each warp and tile ID. A pending or valid tile cannot be requested again when `ALLOW_TILE_OVERWRITE` is disabled. `invalidate_valid` explicitly clears a valid tile. If invalidation and completion target the same tile in one cycle, invalidation wins.
+
+The integrated instruction path distinguishes these cases. A duplicate
+pending prefetch waits for the original transfer, while a `PREFETCH_TILE`
+instruction targeting an already-valid tile retires as an idempotent no-op
+without incrementing the engine request count.
+
+Warp and tile IDs are validated before any state-array access. This prevents
+out-of-range indexing when non-power-of-two parameter values leave unused
+binary encodings.
 
 ## Reset Behavior
 

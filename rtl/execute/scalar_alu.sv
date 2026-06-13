@@ -69,12 +69,14 @@ module scalar_alu #(
       logic [LATENCY-1:0] stage_ready;
       scalar_payload_t payload_r [0:LATENCY-1];
 
-      assign stage_ready[LATENCY-1] =
-          !valid_r[LATENCY-1] || out_ready;
-
-      for (genvar stage = 0; stage < LATENCY - 1; stage++) begin : g_ready
-        assign stage_ready[stage] =
-            !valid_r[stage] || stage_ready[stage+1];
+      always_comb begin
+        stage_ready = '0;
+        stage_ready[LATENCY-1] =
+            !valid_r[LATENCY-1] || out_ready;
+        for (int stage = LATENCY - 2; stage >= 0; stage--) begin
+          stage_ready[stage] =
+              !valid_r[stage] || stage_ready[stage+1];
+        end
       end
 
       assign in_ready =

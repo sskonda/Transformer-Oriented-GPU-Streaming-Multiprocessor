@@ -102,7 +102,8 @@ module async_tile_prefetch_tb;
       global_rsp_valid <= 1'b0;
       if (global_req_valid && global_req_ready) begin
         global_rsp_valid <= 1'b1;
-        global_rsp_data <= RESPONSE_BIAS + global_req_addr;
+        global_rsp_data <=
+            RESPONSE_BIAS + SHARED_DATA_WIDTH'(global_req_addr);
       end
 
       if (shared_wr_valid && shared_wr_ready) begin
@@ -122,7 +123,7 @@ module async_tile_prefetch_tb;
     req_tile_id = tile_id;
     req_global_addr = global_base;
     req_shared_addr = shared_base;
-    req_length = TRANSFER_WORDS;
+    req_length = LENGTH_WIDTH'(TRANSFER_WORDS);
 
     do begin
       @(posedge clk);
@@ -164,21 +165,23 @@ module async_tile_prefetch_tb;
     send_request(tile_id_t'(0), GLOBAL_BASE, SHARED_BASE);
     send_request(
       tile_id_t'(1),
-      GLOBAL_BASE + TRANSFER_WORDS,
-      SHARED_BASE + TRANSFER_WORDS
+      GLOBAL_BASE + GLOBAL_ADDR_WIDTH'(TRANSFER_WORDS),
+      SHARED_BASE + SHARED_ADDR_WIDTH'(TRANSFER_WORDS)
     );
     send_request(
       tile_id_t'(2),
-      GLOBAL_BASE + (2 * TRANSFER_WORDS),
-      SHARED_BASE + (2 * TRANSFER_WORDS)
+      GLOBAL_BASE + GLOBAL_ADDR_WIDTH'(2 * TRANSFER_WORDS),
+      SHARED_BASE + SHARED_ADDR_WIDTH'(2 * TRANSFER_WORDS)
     );
 
     @(negedge clk);
     req_valid = 1'b1;
     req_tile_id = tile_id_t'(3);
-    req_global_addr = GLOBAL_BASE + (3 * TRANSFER_WORDS);
-    req_shared_addr = SHARED_BASE + (3 * TRANSFER_WORDS);
-    req_length = TRANSFER_WORDS;
+    req_global_addr =
+        GLOBAL_BASE + GLOBAL_ADDR_WIDTH'(3 * TRANSFER_WORDS);
+    req_shared_addr =
+        SHARED_BASE + SHARED_ADDR_WIDTH'(3 * TRANSFER_WORDS);
+    req_length = LENGTH_WIDTH'(TRANSFER_WORDS);
     @(posedge clk);
     if (!queue_full || req_ready || !prefetch_stall) begin
       $fatal(1, "prefetch queue did not apply full backpressure");
@@ -193,8 +196,10 @@ module async_tile_prefetch_tb;
 
     for (int unsigned word = 0; word < TRANSFER_WORDS; word++) begin
       if (
-        shared_model[SHARED_BASE + word] !==
-        RESPONSE_BIAS + GLOBAL_BASE + word
+        shared_model[SHARED_BASE + SHARED_ADDR_WIDTH'(word)] !==
+        RESPONSE_BIAS +
+            SHARED_DATA_WIDTH'(GLOBAL_BASE) +
+            SHARED_DATA_WIDTH'(word)
       ) begin
         $fatal(1, "prefetched shared-memory data mismatch");
       end
@@ -205,7 +210,7 @@ module async_tile_prefetch_tb;
     req_tile_id = tile_id_t'(0);
     req_global_addr = GLOBAL_BASE;
     req_shared_addr = SHARED_BASE;
-    req_length = TRANSFER_WORDS;
+    req_length = LENGTH_WIDTH'(TRANSFER_WORDS);
     @(posedge clk);
     if (req_ready) begin
       $fatal(1, "valid tile overwrite was accepted");
@@ -227,8 +232,8 @@ module async_tile_prefetch_tb;
 
     send_request(
       tile_id_t'(3),
-      GLOBAL_BASE + (3 * TRANSFER_WORDS),
-      SHARED_BASE + (3 * TRANSFER_WORDS)
+      GLOBAL_BASE + GLOBAL_ADDR_WIDTH'(3 * TRANSFER_WORDS),
+      SHARED_BASE + SHARED_ADDR_WIDTH'(3 * TRANSFER_WORDS)
     );
     wait (active_request_valid);
     @(negedge clk);

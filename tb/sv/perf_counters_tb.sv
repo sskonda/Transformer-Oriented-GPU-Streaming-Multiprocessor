@@ -139,7 +139,7 @@ module perf_counters_tb;
     @(posedge clk);
     @(negedge clk);
     clear_events();
-    if (counters.completed_warps != NUM_WARPS) begin
+    if (counters.completed_warps != PERF_COUNTER_WIDTH'(NUM_WARPS)) begin
       $fatal(1, "completed warp count did not saturate");
     end
 

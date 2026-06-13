@@ -15,12 +15,14 @@ module fifo #(
 );
 
   localparam int unsigned PTR_WIDTH = (DEPTH > 1) ? $clog2(DEPTH) : 1;
-  localparam logic [PTR_WIDTH-1:0] LAST_PTR = DEPTH - 1;
+  localparam int unsigned COUNT_WIDTH = $clog2(DEPTH + 1);
+  localparam logic [PTR_WIDTH-1:0] LAST_PTR = PTR_WIDTH'(DEPTH - 1);
+  localparam logic [COUNT_WIDTH-1:0] DEPTH_COUNT = COUNT_WIDTH'(DEPTH);
 
   logic [WIDTH-1:0] mem [0:DEPTH-1];
   logic [PTR_WIDTH-1:0] rd_ptr_r;
   logic [PTR_WIDTH-1:0] wr_ptr_r;
-  logic [$clog2(DEPTH+1)-1:0] count_r;
+  logic [COUNT_WIDTH-1:0] count_r;
   logic push;
   logic pop;
 
@@ -32,7 +34,7 @@ module fifo #(
 
   assign out_valid = count_r != '0;
   assign out_data = mem[rd_ptr_r];
-  assign in_ready = (count_r < DEPTH) || (out_valid && out_ready);
+  assign in_ready = (count_r != DEPTH_COUNT) || (out_valid && out_ready);
   assign push = in_valid && in_ready;
   assign pop = out_valid && out_ready;
   assign level = count_r;
@@ -68,7 +70,7 @@ module fifo #(
 
 `ifndef SYNTHESIS
   assert property (@(posedge clk) disable iff (rst || clear)
-    count_r <= DEPTH);
+    count_r <= DEPTH_COUNT);
   assert property (@(posedge clk) disable iff (rst || clear)
     in_valid && !in_ready |-> !push);
   assert property (@(posedge clk) disable iff (rst || clear)

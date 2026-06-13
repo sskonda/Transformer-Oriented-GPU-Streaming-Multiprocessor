@@ -8,7 +8,7 @@ module shared_memory_tb;
   localparam logic [SHARED_ADDR_WIDTH-1:0] BANK0_ROW0 = 0;
   localparam logic [SHARED_ADDR_WIDTH-1:0] BANK1_ROW0 = 1;
   localparam logic [SHARED_ADDR_WIDTH-1:0] BANK0_ROW1 =
-      SHARED_NUM_BANKS;
+      SHARED_ADDR_WIDTH'(SHARED_NUM_BANKS);
   localparam logic [SHARED_DATA_WIDTH-1:0] DATA_A = 32'h1357_9bdf;
   localparam logic [SHARED_DATA_WIDTH-1:0] DATA_B = 32'h2468_ace0;
   localparam logic [SHARED_DATA_WIDTH-1:0] DATA_C = 32'hdead_beef;

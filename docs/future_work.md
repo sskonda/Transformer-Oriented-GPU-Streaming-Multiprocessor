@@ -34,6 +34,7 @@
   a licensed simulator
 - Add dedicated queue-level, state-transition, and conflict covergroups
 - Add formal protocol and deadlock properties
+- Add randomized memory latency and backpressure to the direct Verilator flow
 - Run many-seed regressions in CI when simulator licensing permits
 
 ## Implementation Results

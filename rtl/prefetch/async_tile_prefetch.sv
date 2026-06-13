@@ -88,6 +88,16 @@ module async_tile_prefetch #(
   logic [NUM_WARPS-1:0][NUM_TILES-1:0] tile_pending_r;
   logic tile_completed_r;
   logic request_allowed;
+  logic request_indices_valid;
+  logic invalidate_indices_valid;
+  localparam logic [WARP_ID_WIDTH:0] NUM_WARPS_LIMIT =
+      (WARP_ID_WIDTH + 1)'(NUM_WARPS);
+  localparam logic [TILE_ID_WIDTH:0] NUM_TILES_LIMIT =
+      (TILE_ID_WIDTH + 1)'(NUM_TILES);
+  localparam logic [LENGTH_WIDTH-1:0] MAX_TRANSFER_LENGTH =
+      LENGTH_WIDTH'(MAX_TRANSFER_WORDS);
+  localparam logic [$clog2(QUEUE_DEPTH+1)-1:0] QUEUE_DEPTH_LEVEL =
+      $clog2(QUEUE_DEPTH+1)'(QUEUE_DEPTH);
 
   always_comb begin
     fifo_in_data.warp_id = req_warp_id;
@@ -96,14 +106,21 @@ module async_tile_prefetch #(
     fifo_in_data.shared_addr = req_shared_addr;
     fifo_in_data.length = req_length;
 
-    request_allowed =
-        req_warp_id < NUM_WARPS &&
-        req_tile_id < NUM_TILES &&
-        req_length != '0 &&
-        req_length <= MAX_TRANSFER_WORDS &&
-        !tile_pending_r[req_warp_id][req_tile_id] &&
-        (ALLOW_TILE_OVERWRITE ||
-         !tile_valid_r[req_warp_id][req_tile_id]);
+    request_indices_valid =
+        {1'b0, req_warp_id} < NUM_WARPS_LIMIT &&
+        {1'b0, req_tile_id} < NUM_TILES_LIMIT;
+    invalidate_indices_valid =
+        {1'b0, invalidate_warp_id} < NUM_WARPS_LIMIT &&
+        {1'b0, invalidate_tile_id} < NUM_TILES_LIMIT;
+    request_allowed = 1'b0;
+    if (request_indices_valid) begin
+      request_allowed =
+          req_length != '0 &&
+          req_length <= MAX_TRANSFER_LENGTH &&
+          !tile_pending_r[req_warp_id][req_tile_id] &&
+          (ALLOW_TILE_OVERWRITE ||
+           !tile_valid_r[req_warp_id][req_tile_id]);
+    end
 
     req_ready = !rst && !clear && fifo_in_ready && request_allowed;
     request_accepted = req_valid && req_ready;
@@ -113,10 +130,12 @@ module async_tile_prefetch #(
     fifo_pop = fifo_out_valid && fifo_out_ready;
 
     global_req_valid = state_r == PREFETCH_SEND_READ;
-    global_req_addr = active_req_r.global_addr + word_index_r;
+    global_req_addr =
+        active_req_r.global_addr + GLOBAL_ADDR_WIDTH'(word_index_r);
     global_rsp_ready = state_r == PREFETCH_WAIT_RESPONSE;
     shared_wr_valid = state_r == PREFETCH_WRITE_SHARED;
-    shared_wr_addr = active_req_r.shared_addr + word_index_r;
+    shared_wr_addr =
+        active_req_r.shared_addr + SHARED_ADDR_WIDTH'(word_index_r);
     shared_wr_data = response_data_r;
   end
 
@@ -197,14 +216,14 @@ module async_tile_prefetch #(
         end
       endcase
 
-      if (invalidate_valid) begin
+      if (invalidate_valid && invalidate_indices_valid) begin
         tile_valid_r[invalidate_warp_id][invalidate_tile_id] <= 1'b0;
       end
     end
   end
 
   assign tile_valid = tile_valid_r;
-  assign queue_full = queue_level == QUEUE_DEPTH;
+  assign queue_full = queue_level == QUEUE_DEPTH_LEVEL;
   assign active_request_valid = state_r != PREFETCH_IDLE;
   assign current_warp_id = active_req_r.warp_id;
   assign current_tile_id = active_req_r.tile_id;

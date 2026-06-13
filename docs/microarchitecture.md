@@ -32,7 +32,7 @@ modes.
 | `ALU_ADD` | Writes `src0 + src1` to `dst`. |
 | `ALU_MUL` | Writes the low scalar-width product to `dst`. |
 | `ALU_MAD` | Writes `src0 * src1 + src2` to `dst`. |
-| `PREFETCH_TILE` | Enqueues one packed tensor tile from the immediate word address. |
+| `PREFETCH_TILE` | Enqueues one packed tensor tile, or retires as an idempotent no-op if that tile is already valid. |
 | `WAIT_TILE` | Blocks until the selected warp-local tile is valid. |
 | `TENSOR_MMA` | Multiplies the selected tile matrices and writes element `[0][0]` to `dst`. |
 | `BARRIER` | Waits until every launched, nonterminal warp reaches the barrier. |
@@ -41,6 +41,11 @@ modes.
 
 The complete tensor matrix is also emitted on the tensor result interface for
 verification and workload checking.
+
+Barrier-arrived warps are masked from scheduler eligibility until all
+launched, nonterminal warps have arrived. This gating is independent of warp
+state classification so no scheduling policy can issue past an unreleased
+barrier.
 
 ## Tile format
 
@@ -52,6 +57,9 @@ eight words: four for A and four for B.
 Global memory addresses are word addresses. Each accepted global request
 returns one word through the valid/ready response channel. Prefetch writes the
 same word into banked shared memory and the tensor tile buffer.
+
+Request and invalidation IDs are range-checked before indexing tile state,
+including configurations whose encoded ID width contains unused values.
 
 ## Completion
 

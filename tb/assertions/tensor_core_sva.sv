@@ -29,7 +29,7 @@ module tensor_core_sva #(
 
   if (TENSOR_ARCH == TENSOR_ARCH_TREE) begin : g_tree
     assert property (@(posedge clk) disable iff (rst || clear)
-      out_valid == in_valid);
+      in_valid && in_ready |=> out_valid);
   end
 
   if (

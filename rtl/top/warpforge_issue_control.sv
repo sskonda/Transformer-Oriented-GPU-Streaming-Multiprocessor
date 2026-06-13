@@ -67,7 +67,7 @@ module warpforge_issue_control #(
     forwarding_match =
         ENABLE_OPERAND_FORWARDING &&
         wb_valid &&
-        wb_warp_id == warp &&
+        wb_warp_id == WARP_ID_WIDTH'(warp) &&
         wb_dst == source;
     return source_used &&
         scoreboard_busy[warp][source] &&
@@ -93,7 +93,11 @@ module warpforge_issue_control #(
       query_src0[warp] = current_instruction[warp].src0;
       query_src1[warp] = current_instruction[warp].src1;
       query_src2[warp] = current_instruction[warp].src2;
+    end
+  end
 
+  always_comb begin
+    for (int unsigned warp = 0; warp < NUM_WARPS; warp++) begin
       if (ENABLE_OPERAND_FORWARDING) begin
         scoreboard_stall[warp] =
             source_blocked(warp, query_use_src0[warp], query_src0[warp]) ||
@@ -115,10 +119,10 @@ module warpforge_issue_control #(
       tile_wait[warp] =
           warp_active[warp] &&
           instruction_valid[warp] &&
-          current_instruction[warp].opcode inside {
-            OP_WAIT_TILE,
-            OP_TENSOR_MMA
-          } &&
+          (
+            current_instruction[warp].opcode == OP_WAIT_TILE ||
+            current_instruction[warp].opcode == OP_TENSOR_MMA
+          ) &&
           !tile_valid[warp][current_instruction[warp].tile_id];
       tensor_wait[warp] =
           warp_active[warp] &&
@@ -129,6 +133,7 @@ module warpforge_issue_control #(
           warp_active[warp] &&
           instruction_valid[warp] &&
           current_instruction[warp].opcode == OP_PREFETCH_TILE &&
+          !tile_valid[warp][current_instruction[warp].tile_id] &&
           prefetch_queue_full;
       tile_preferred[warp] =
           warp_active[warp] &&
@@ -187,8 +192,14 @@ module warpforge_issue_control #(
         end
 
         OP_PREFETCH_TILE: begin
-          prefetch_req_valid = 1'b1;
-          issue_accept = prefetch_req_ready;
+          if (
+            tile_valid[scheduler_warp_id][selected_instruction.tile_id]
+          ) begin
+            issue_accept = 1'b1;
+          end else begin
+            prefetch_req_valid = 1'b1;
+            issue_accept = prefetch_req_ready;
+          end
         end
 
         default: begin
