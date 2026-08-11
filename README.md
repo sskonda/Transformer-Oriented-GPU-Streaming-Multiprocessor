@@ -1,6 +1,6 @@
-# WarpForge
+# Transformer-Oriented-GPU-Streaming-Multiprocessor
 
-WarpForge is a simplified transformer-oriented GPU Streaming Multiprocessor
+This Project is a simplified transformer-oriented GPU Streaming Multiprocessor
 written in synthesizable SystemVerilog. It integrates SIMT-style warp
 scheduling, register dependency tracking, warp lifecycle control, banked
 shared memory, queued tile prefetch, scalar execution, signed INT8 tensor
@@ -14,13 +14,13 @@ and does not claim support for full GPT, BERT, Llama, or other large models.
 
 Transformer accelerators are not only matrix multipliers. Their performance
 depends on scheduling, dependency management, data movement, memory banking,
-latency tolerance, and resource arbitration. WarpForge makes those
+latency tolerance, and resource arbitration. This SM makes those
 interactions visible in a compact project that can be simulated, verified,
 and discussed at the RTL and microarchitecture levels.
 
 ## Difference between this and a generic CPU
 
-WarpForge is not a general-purpose CPU and does not implement the RISC-V ISA.
+This SM is not a general-purpose CPU and does not implement the RISC-V ISA.
 It uses a compact custom instruction format built around warp scheduling,
 asynchronous tile movement, scalar bookkeeping, and tensor operations. The
 design emphasis is GPU-style control and dataflow rather than branch-heavy
@@ -328,7 +328,7 @@ python tools/generate_gemm_program.py workloads/gemm --seed 17
   scores-times-V reference
 
 The MLP and transformer demos validate data preparation and golden arithmetic.
-They are not yet lowered into WarpForge tile programs. Softmax is omitted from
+They are not yet lowered into This SM tile programs. Softmax is omitted from
 the transformer demo. See [workloads.md](docs/workloads.md).
 
 ## Measured Simulation Results
@@ -414,4 +414,4 @@ style: explicit circuit structure, `always_ff` for sequential logic,
 `always_comb` for combinational logic, nonblocking clocked assignments,
 parameter checks, controlled resets, and timing-aware reduction structures.
 
-WarpForge is maintained by Sanat Konda and released under the MIT License.
+This SM is maintained by Sanat Konda and released under the MIT License.
